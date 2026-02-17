@@ -1,0 +1,217 @@
+import numpy as np
+
+# ================== ВВОД ДАННЫХ ==================
+def input_matrix(name="A"):
+    try:
+        rows = int(input(f"Введите количество строк для матрицы {name}: "))
+        cols = int(input(f"Введите количество столбцов для матрицы {name}: "))
+        print(f"Введите элементы матрицы {name} построчно через пробел:")
+        data = []
+        for i in range(rows):
+            row = list(map(float, input(f"Строка {i+1}: ").split()))
+            if len(row) != cols:
+                print("Неверное количество элементов в строке!")
+                return None
+            data.append(row)
+        return np.array(data)
+    except Exception as e:
+        print("Ошибка ввода матрицы:", e)
+        return None
+
+def input_vector(name="v"):
+    try:
+        print(f"Введите элементы вектора {name} через пробел:")
+        v = np.array(list(map(float, input().split())))
+        return v
+    except Exception as e:
+        print("Ошибка ввода вектора:", e)
+        return None
+
+# ================== ОПЕРАЦИИ С МАТРИЦАМИ ==================
+def matrix_operations():
+    print("\nВыберите операцию с матрицей:")
+    print("1. Сложение")
+    print("2. Вычитание")
+    print("3. Умножение на число")
+    print("4. Умножение матриц")
+    print("5. Транспонирование")
+    print("6. Определитель")
+    print("7. Ранг")
+    choice = input("Введите номер операции: ")
+
+    if choice in ["1", "2", "4"]:
+        A = input_matrix("A")
+        B = input_matrix("B")
+        if A is None or B is None:
+            return
+        if choice == "1":
+            print("Промежуточные шаги: A + B")
+            print("Результат:\n", A + B)
+        elif choice == "2":
+            print("Промежуточные шаги: A - B")
+            print("Результат:\n", A - B)
+        elif choice == "4":
+            try:
+                print("Промежуточные шаги: A * B")
+                print("Результат:\n", A @ B)
+            except ValueError:
+                print("Невозможно умножить матрицы данных размеров")
+    elif choice == "3":
+        A = input_matrix("A")
+        if A is None: return
+        try:
+            k = float(input("Введите число для умножения: "))
+            print("Промежуточные шаги: k * A")
+            print("Результат:\n", k * A)
+        except ValueError:
+            print("Неверное число")
+    elif choice == "5":
+        A = input_matrix("A")
+        if A is None: return
+        print("Промежуточные шаги: A^T")
+        print("Результат:\n", A.T)
+    elif choice == "6":
+        A = input_matrix("A")
+        if A is None: return
+        try:
+            det = np.linalg.det(A)
+            print("Определитель:", det)
+        except np.linalg.LinAlgError:
+            print("Ошибка при вычислении определителя")
+    elif choice == "7":
+        A = input_matrix("A")
+        if A is None: return
+        rank = np.linalg.matrix_rank(A)
+        print("Ранг матрицы:", rank)
+    else:
+        print("Неверный выбор")
+
+# ================== ОПЕРАЦИИ С ВЕКТОРАМИ ==================
+def vector_operations():
+    print("\nВыберите операцию с вектором:")
+    print("1. Сложение")
+    print("2. Вычитание")
+    print("3. Умножение на число")
+    print("4. Скалярное произведение")
+    print("5. Векторное произведение (только 3D)")
+    print("6. Смешанное произведение (только 3D)")
+    choice = input("Введите номер операции: ")
+
+    if choice in ["1", "2"]:
+        v1 = input_vector("v1")
+        v2 = input_vector("v2")
+        if v1.shape != v2.shape:
+            print("Векторы должны иметь одинаковую длину!")
+            return
+        if choice == "1":
+            print("Промежуточные шаги: v1 + v2")
+            print("Результат:", v1 + v2)
+        else:
+            print("Промежуточные шаги: v1 - v2")
+            print("Результат:", v1 - v2)
+    elif choice == "3":
+        v = input_vector("v")
+        try:
+            k = float(input("Введите число для умножения: "))
+            print("Промежуточные шаги: k * v")
+            print("Результат:", k * v)
+        except ValueError:
+            print("Неверное число")
+    elif choice == "4":
+        v1 = input_vector("v1")
+        v2 = input_vector("v2")
+        if v1.shape != v2.shape:
+            print("Векторы должны иметь одинаковую длину!")
+            return
+        print("Промежуточные шаги: v1 · v2")
+        print("Результат:", np.dot(v1, v2))
+    elif choice == "5":
+        v1 = input_vector("v1")
+        v2 = input_vector("v2")
+        if v1.shape[0] != 3 or v2.shape[0] != 3:
+            print("Векторы должны быть 3D для векторного произведения!")
+            return
+        print("Промежуточные шаги: v1 × v2")
+        print("Результат:", np.cross(v1, v2))
+    elif choice == "6":
+        v1 = input_vector("v1")
+        v2 = input_vector("v2")
+        v3 = input_vector("v3")
+        if v1.shape[0] != 3 or v2.shape[0] != 3 or v3.shape[0] != 3:
+            print("Векторы должны быть 3D для смешанного произведения!")
+            return
+        print("Промежуточные шаги: (v1 × v2) · v3")
+        print("Результат:", np.dot(np.cross(v1, v2), v3))
+    else:
+        print("Неверный выбор")
+
+# ================== РЕШЕНИЕ СЛАУ ==================
+def solve_slae():
+    print("\nВыберите метод решения СЛАУ:")
+    print("1. Матричный метод")
+    print("2. Метод Крамера")
+    print("3. Метод Гаусса")
+    A = input_matrix("A")
+    b = input_vector("b")
+    if A is None or b is None:
+        return
+    if A.shape[0] != b.shape[0]:
+        print("Количество строк матрицы должно совпадать с размерностью вектора b!")
+        return
+
+    # Матричный метод
+    if input("Выберите метод (1/2/3): ") == "1":
+        try:
+            x = np.linalg.inv(A) @ b
+            print("Промежуточные шаги: x = A^-1 * b")
+            print("Результат:", x)
+        except np.linalg.LinAlgError:
+            print("Матрица необратима, метод не применим")
+    # Метод Крамера
+    elif input("Выберите метод (1/2/3): ") == "2":
+        detA = np.linalg.det(A)
+        if detA == 0:
+            print("Матрица вырождена, метод Крамера невозможен")
+            return
+        x = []
+        for i in range(A.shape[1]):
+            Ai = A.copy()
+            Ai[:, i] = b
+            xi = np.linalg.det(Ai) / detA
+            x.append(xi)
+        print("Промежуточные шаги: вычисление детерминантов")
+        print("Результат:", np.array(x))
+    # Метод Гаусса
+    elif input("Выберите метод (1/2/3): ") == "3":
+        try:
+            from scipy.linalg import solve
+            x = solve(A, b)
+            print("Промежуточные шаги: метод Гаусса")
+            print("Результат:", x)
+        except Exception as e:
+            print("Ошибка метода Гаусса:", e)
+    else:
+        print("Неверный выбор")
+
+# ================== ГЛАВНОЕ МЕНЮ ==================
+def main():
+    while True:
+        print("\n===== МАТЕМАТИЧЕСКИЙ КАЛЬКУЛЯТОР =====")
+        print("1. Матрицы")
+        print("2. Векторы")
+        print("3. Решение СЛАУ")
+        print("0. Выход")
+        choice = input("Введите номер: ")
+        if choice == "1":
+            matrix_operations()
+        elif choice == "2":
+            vector_operations()
+        elif choice == "3":
+            solve_slae()
+        elif choice == "0":
+            break
+        else:
+            print("Неверный выбор")
+
+if __name__ == "__main__":
+    main()
