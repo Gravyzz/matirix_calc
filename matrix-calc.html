@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Матричный Калькулятор</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#06060a;color:#e0e0e0;font-family:'Inter',sans-serif;line-height:1.6;padding:1rem;min-height:100vh}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;color:#fff;letter-spacing:-0.02em}
+h1{font-size:1.75rem;font-weight:700}
+h2{font-size:1.15rem;font-weight:600;margin:1rem 0 .5rem;color:#c0c0c0}
+.container{max-width:1200px;margin:0 auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+.header-meta{color:rgba(255,255,255,0.4);font-size:.85rem}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.tabs{display:flex;gap:.5rem;margin-bottom:1.5rem}
+.tab{padding:.6rem 1.5rem;border-radius:8px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.95rem;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);color:#e0e0e0;transition:all .2s}
+.tab:hover{background:rgba(255,255,255,0.06)}
+.tab.active{background:rgba(59,130,246,0.15);color:#3b82f6;border-color:rgba(59,130,246,0.3)}
+.mode{display:none}
+.mode.active{display:block}
+.dim-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap}
+.dim-row label{font-size:.85rem;color:rgba(255,255,255,0.5)}
+.dim-row select,.dim-row input[type="number"]{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#fff;padding:.35rem .5rem;font-size:.9rem;width:60px;font-family:'Inter',sans-serif}
+.matrix-grid{display:inline-grid;gap:4px;margin:.5rem 0}
+.matrix-grid input{width:60px;height:36px;text-align:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#fff;font-size:.9rem;font-family:'Inter',sans-serif}
+.matrix-grid input:focus{outline:none;border-color:#3b82f6;background:rgba(59,130,246,0.08)}
+.matrix-grid input.focused-cell{border-color:#22c55e;background:rgba(34,197,94,0.08)}
+.btn-row{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
+.btn{padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.85rem;border:none;transition:all .2s;color:#fff}
+.btn-blue{background:rgba(59,130,246,0.2);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)}
+.btn-blue:hover{background:rgba(59,130,246,0.3)}
+.btn-green{background:rgba(34,197,94,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.3)}
+.btn-green:hover{background:rgba(34,197,94,0.3)}
+.btn-yellow{background:rgba(234,179,8,0.2);color:#eab308;border:1px solid rgba(234,179,8,0.3)}
+.btn-yellow:hover{background:rgba(234,179,8,0.3)}
+.btn-red{background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
+.btn-red:hover{background:rgba(239,68,68,0.3)}
+.scalar-input{width:80px;height:36px;text-align:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#fff;font-size:.9rem;font-family:'Inter',sans-serif}
+.scalar-input:focus{outline:none;border-color:#eab308}
+#result{min-height:100px;white-space:pre-wrap;font-family:'Space Grotesk',monospace;font-size:.9rem;line-height:1.8;max-height:600px;overflow-y:auto}
+#result .step{margin:.5rem 0;padding:.5rem .75rem;background:rgba(255,255,255,0.02);border-left:3px solid rgba(59,130,246,0.4);border-radius:0 6px 6px 0}
+#result .final{margin:.5rem 0;padding:.75rem;background:rgba(34,197,94,0.05);border-left:3px solid #22c55e;border-radius:0 6px 6px 0;font-weight:600}
+#result .error{margin:.5rem 0;padding:.75rem;background:rgba(239,68,68,0.05);border-left:3px solid #ef4444;border-radius:0 6px 6px 0;color:#ef4444}
+.matrix-label{font-family:'Space Grotesk',sans-serif;font-weight:600;color:#c0c0c0;margin-bottom:.25rem;font-size:.9rem}
+.result-matrix{display:inline-grid;gap:2px;margin:.25rem 0}
+.result-matrix span{display:flex;align-items:center;justify-content:center;min-width:50px;height:28px;font-size:.85rem;padding:0 6px}
+.numpad{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:240px}
+.numpad .btn{padding:.6rem;text-align:center;font-size:1rem}
+.grids-row{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start}
+.grid-block{flex:0 0 auto}
+.vec-inputs{display:flex;gap:4px;margin:.5rem 0;align-items:center}
+.vec-inputs input{width:70px;height:36px;text-align:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#fff;font-size:.9rem;font-family:'Inter',sans-serif}
+.vec-inputs input:focus{outline:none;border-color:#3b82f6}
+.vec-inputs input.focused-cell{border-color:#22c55e;background:rgba(34,197,94,0.08)}
+@media(max-width:768px){
+  body{padding:.5rem}
+  .matrix-grid input{width:48px;height:32px;font-size:.8rem}
+  .grids-row{flex-direction:column}
+  .numpad{max-width:100%}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<div><h1>📐 Матричный Калькулятор</h1><p class="header-meta">Матрицы • СЛАУ • Векторы</p></div>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="switchMode('matrix')">Матрицы</div>
+<div class="tab" onclick="switchMode('slau')">СЛАУ</div>
+<div class="tab" onclick="switchMode('vector')">Векторы</div>
+</div>
+
+<!-- MATRIX MODE -->
+<div id="mode-matrix" class="mode active">
+<div class="card">
+<div class="grids-row">
+<div class="grid-block">
+<div class="matrix-label">Матрица A</div>
+<div class="dim-row">
+<label>Строк:</label><select id="ma-rows" onchange="buildMatrixGrid('ma')"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
+<label>Столбцов:</label><select id="ma-cols" onchange="buildMatrixGrid('ma')"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
+</div>
+<div id="grid-ma" class="matrix-grid"></div>
+</div>
+<div class="grid-block">
+<div class="matrix-label">Матрица B</div>
+<div class="dim-row">
+<label>Строк:</label><select id="mb-rows" onchange="buildMatrixGrid('mb')"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
+<label>Столбцов:</label><select id="mb-cols" onchange="buildMatrixGrid('mb')"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
+</div>
+<div id="grid-mb" class="matrix-grid"></div>
+</div>
+</div>
+<div class="dim-row" style="margin-top:.75rem">
+<label>Скаляр k =</label><input type="number" class="scalar-input" id="scalar-k" value="2" step="any">
+</div>
+<div class="btn-row">
+<button class="btn btn-blue" onclick="matOp('add')">A + B</button>
+<button class="btn btn-blue" onclick="matOp('sub')">A − B</button>
+<button class="btn btn-yellow" onclick="matOp('smul')">k × A</button>
+<button class="btn btn-blue" onclick="matOp('mul')">A × B</button>
+<button class="btn btn-green" onclick="matOp('trans')">Aᵀ</button>
+<button class="btn btn-green" onclick="matOp('det')">det(A)</button>
+<button class="btn btn-green" onclick="matOp('rank')">rank(A)</button>
+<button class="btn btn-green" onclick="matOp('inv')">A⁻¹</button>
+</div>
+</div>
+</div>
+
+<!-- SLAU MODE -->
+<div id="mode-slau" class="mode">
+<div class="card">
+<div class="dim-row">
+<label>Число уравнений (n):</label>
+<select id="slau-n" onchange="buildSlauGrid()"><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+</div>
+<div class="matrix-label">Расширенная матрица [A|b]</div>
+<div id="grid-slau" class="matrix-grid"></div>
+<div class="btn-row">
+<button class="btn btn-blue" onclick="slauSolve('matrix')">Матричный метод</button>
+<button class="btn btn-blue" onclick="slauSolve('cramer')">Метод Крамера</button>
+<button class="btn btn-green" onclick="slauSolve('gauss')">Метод Гаусса</button>
+</div>
+</div>
+</div>
+
+<!-- VECTOR MODE -->
+<div id="mode-vector" class="mode">
+<div class="card">
+<div class="dim-row">
+<label>Размерность:</label>
+<select id="vec-dim" onchange="buildVecInputs()"><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+</div>
+<div class="matrix-label">Вектор a⃗</div>
+<div id="vec-a" class="vec-inputs"></div>
+<div class="matrix-label">Вектор b⃗</div>
+<div id="vec-b" class="vec-inputs"></div>
+<div class="matrix-label">Вектор c⃗ <span style="font-size:.75rem;color:rgba(255,255,255,0.3)">(для смешанного произведения)</span></div>
+<div id="vec-c" class="vec-inputs"></div>
+<div class="dim-row" style="margin-top:.75rem">
+<label>Скаляр k =</label><input type="number" class="scalar-input" id="vec-scalar-k" value="2" step="any">
+</div>
+<div class="btn-row">
+<button class="btn btn-blue" onclick="vecOp('add')">a⃗ + b⃗</button>
+<button class="btn btn-blue" onclick="vecOp('sub')">a⃗ − b⃗</button>
+<button class="btn btn-yellow" onclick="vecOp('smul')">k × a⃗</button>
+<button class="btn btn-green" onclick="vecOp('dot')">( a⃗, b⃗ ) скалярное</button>
+<button class="btn btn-green" onclick="vecOp('cross')">[ a⃗ × b⃗ ] векторное</button>
+<button class="btn btn-green" onclick="vecOp('mixed')">( a⃗, b⃗, c⃗ ) смешанное</button>
+</div>
+</div>
+</div>
+
+<!-- NUMPAD -->
+<div class="card">
+<h2>🔢 Цифровая панель</h2>
+<p style="font-size:.8rem;color:rgba(255,255,255,0.35);margin-bottom:.5rem">Кликните на ячейку, затем вводите цифры</p>
+<div class="numpad">
+<button class="btn btn-blue" onclick="numpad('7')">7</button>
+<button class="btn btn-blue" onclick="numpad('8')">8</button>
+<button class="btn btn-blue" onclick="numpad('9')">9</button>
+<button class="btn btn-red" onclick="numpad('C')">C</button>
+<button class="btn btn-blue" onclick="numpad('4')">4</button>
+<button class="btn btn-blue" onclick="numpad('5')">5</button>
+<button class="btn btn-blue" onclick="numpad('6')">6</button>
+<button class="btn btn-yellow" onclick="numpad('-')">±</button>
+<button class="btn btn-blue" onclick="numpad('1')">1</button>
+<button class="btn btn-blue" onclick="numpad('2')">2</button>
+<button class="btn btn-blue" onclick="numpad('3')">3</button>
+<button class="btn btn-yellow" onclick="numpad('.')">.</button>
+<button class="btn btn-blue" onclick="numpad('0')">0</button>
+<button class="btn btn-blue" onclick="numpad('00')">00</button>
+<button class="btn btn-green" onclick="numpad('BS')">⌫</button>
+<button class="btn btn-green" onclick="numpad('TAB')">→</button>
+</div>
+</div>
+
+<!-- RESULT -->
+<div class="card">
+<h2>📊 Результат</h2>
+<div id="result"><span style="color:rgba(255,255,255,0.3)">Выберите операцию для вычисления...</span></div>
+</div>
+</div>
+
+<script>
+// ============ GLOBALS ============
+let focusedInput = null;
+
+// Track focused cell
+document.addEventListener('focusin', e => {
+  if (e.target.tagName === 'INPUT' && (e.target.closest('.matrix-grid') || e.target.closest('.vec-inputs') || e.target.classList.contains('scalar-input'))) {
+    document.querySelectorAll('.focused-cell').forEach(el => el.classList.remove('focused-cell'));
+    e.target.classList.add('focused-cell');
+    focusedInput = e.target;
+  }
+});
+
+// ============ NUMPAD ============
+function numpad(key) {
+  if (!focusedInput) return;
+  let v = focusedInput.value;
+  if (key === 'C') { focusedInput.value = ''; }
+  else if (key === 'BS') { focusedInput.value = v.slice(0, -1); }
+  else if (key === '-') { focusedInput.value = v.startsWith('-') ? v.slice(1) : '-' + v; }
+  else if (key === 'TAB') {
+    // Move to next input in same container
+    const container = focusedInput.closest('.matrix-grid, .vec-inputs');
+    if (container) {
+      const inputs = [...container.querySelectorAll('input')];
+      const idx = inputs.indexOf(focusedInput);
+      if (idx < inputs.length - 1) inputs[idx + 1].focus();
+      else {
+        // try next container
+        const allInputs = [...document.querySelectorAll('.mode.active input')];
+        const gi = allInputs.indexOf(focusedInput);
+        if (gi < allInputs.length - 1) allInputs[gi + 1].focus();
+      }
+    }
+  }
+  else { focusedInput.value = v + key; }
+  focusedInput.focus();
+}
+
+// ============ MODE SWITCHING ============
+function switchMode(mode) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['matrix','slau','vector'][i] === mode);
+  });
+  document.querySelectorAll('.mode').forEach(m => m.classList.remove('active'));
+  document.getElementById('mode-' + mode).classList.add('active');
+}
+
+// ============ GRID BUILDERS ============
+function buildMatrixGrid(id) {
+  const rows = +document.getElementById(id + '-rows').value;
+  const cols = +document.getElementById(id + '-cols').value;
+  const grid = document.getElementById('grid-' + id);
+  grid.style.gridTemplateColumns = `repeat(${cols}, 60px)`;
+  grid.innerHTML = '';
+  for (let i = 0; i < rows; i++)
+    for (let j = 0; j < cols; j++) {
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.value = '0';
+      inp.dataset.r = i; inp.dataset.c = j;
+      grid.appendChild(inp);
+    }
+}
+
+function buildSlauGrid() {
+  const n = +document.getElementById('slau-n').value;
+  const cols = n + 1;
+  const grid = document.getElementById('grid-slau');
+  grid.style.gridTemplateColumns = `repeat(${cols}, 60px)`;
+  grid.innerHTML = '';
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < cols; j++) {
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.value = '0';
+      if (j === n) inp.style.borderColor = 'rgba(234,179,8,0.3)';
+      grid.appendChild(inp);
+    }
+}
+
+function buildVecInputs() {
+  const dim = +document.getElementById('vec-dim').value;
+  ['vec-a','vec-b','vec-c'].forEach(id => {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    for (let i = 0; i < dim; i++) {
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.value = '0';
+      el.appendChild(inp);
+    }
+  });
+}
+
+// ============ MATRIX READ/HELPERS ============
+function readMatrix(id) {
+  const rows = +document.getElementById(id + '-rows').value;
+  const cols = +document.getElementById(id + '-cols').value;
+  const inputs = document.getElementById('grid-' + id).querySelectorAll('input');
+  const m = [];
+  for (let i = 0; i < rows; i++) {
+    m[i] = [];
+    for (let j = 0; j < cols; j++) {
+      const v = parseFloat(inputs[i * cols + j].value);
+      if (isNaN(v)) throw new Error(`Некорректное значение в матрице ${id === 'ma' ? 'A' : 'B'} [${i+1},${j+1}]`);
+      m[i][j] = v;
+    }
+  }
+  return m;
+}
+
+function readSlau() {
+  const n = +document.getElementById('slau-n').value;
+  const inputs = document.getElementById('grid-slau').querySelectorAll('input');
+  const A = [], b = [];
+  for (let i = 0; i < n; i++) {
+    A[i] = [];
+    for (let j = 0; j < n; j++) {
+      const v = parseFloat(inputs[i * (n + 1) + j].value);
+      if (isNaN(v)) throw new Error(`Некорректное значение [${i+1},${j+1}]`);
+      A[i][j] = v;
+    }
+    const bv = parseFloat(inputs[i * (n + 1) + n].value);
+    if (isNaN(bv)) throw new Error(`Некорректное значение b[${i+1}]`);
+    b[i] = bv;
+  }
+  return { A, b, n };
+}
+
+function readVec(id) {
+  const inputs = document.getElementById(id).querySelectorAll('input');
+  return [...inputs].map((inp, i) => {
+    const v = parseFloat(inp.value);
+    if (isNaN(v)) throw new Error(`Некорректное значение в векторе [${i+1}]`);
+    return v;
+  });
+}
+
+function fmt(n) {
+  if (Number.isInteger(n)) return n.toString();
+  // Show fractions nicely
+  const r = Math.round(n * 10000) / 10000;
+  if (Number.isInteger(r)) return r.toString();
+  return r.toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+function matStr(m, label) {
+  if (!m || !m.length) return '';
+  const colW = [];
+  for (let j = 0; j < m[0].length; j++) {
+    colW[j] = 0;
+    for (let i = 0; i < m.length; i++) colW[j] = Math.max(colW[j], fmt(m[i][j]).length);
+  }
+  let s = label ? label + ' =\n' : '';
+  for (let i = 0; i < m.length; i++) {
+    s += '│ ' + m[i].map((v, j) => fmt(v).padStart(colW[j])).join('  ') + ' │\n';
+  }
+  return s;
+}
+
+function vecStr(v, label) {
+  return (label ? label + ' = ' : '') + '( ' + v.map(fmt).join(', ') + ' )';
+}
+
+// ============ MATRIX OPERATIONS ============
+function cloneM(m) { return m.map(r => [...r]); }
+
+function addM(a, b) {
+  if (a.length !== b.length || a[0].length !== b[0].length) throw new Error('Размеры матриц несовместимы для сложения');
+  return a.map((r, i) => r.map((v, j) => v + b[i][j]));
+}
+
+function subM(a, b) {
+  if (a.length !== b.length || a[0].length !== b[0].length) throw new Error('Размеры матриц несовместимы для вычитания');
+  return a.map((r, i) => r.map((v, j) => v - b[i][j]));
+}
+
+function smulM(k, m) { return m.map(r => r.map(v => v * k)); }
+
+function mulM(a, b) {
+  if (a[0].length !== b.length) throw new Error(`Размеры матриц несовместимы для умножения: A(${a.length}×${a[0].length}) × B(${b.length}×${b[0].length})`);
+  const r = a.length, c = b[0].length, n = a[0].length;
+  const res = Array.from({length: r}, () => Array(c).fill(0));
+  for (let i = 0; i < r; i++)
+    for (let j = 0; j < c; j++)
+      for (let k = 0; k < n; k++) res[i][j] += a[i][k] * b[k][j];
+  return res;
+}
+
+function transM(m) {
+  const r = m.length, c = m[0].length;
+  return Array.from({length: c}, (_, j) => Array.from({length: r}, (_, i) => m[i][j]));
+}
+
+function det(m) {
+  const n = m.length;
+  if (n !== m[0].length) throw new Error('Определитель определён только для квадратных матриц');
+  if (n === 1) return m[0][0];
+  if (n === 2) return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+  let d = 0;
+  for (let j = 0; j < n; j++) {
+    d += ((j % 2 === 0) ? 1 : -1) * m[0][j] * det(minor(m, 0, j));
+  }
+  return d;
+}
+
+function minor(m, ri, ci) {
+  return m.filter((_, i) => i !== ri).map(r => r.filter((_, j) => j !== ci));
+}
+
+function rankM(m) {
+  const a = cloneM(m);
+  const rows = a.length, cols = a[0].length;
+  let rank = 0;
+  const steps = [];
+  for (let col = 0; col < cols && rank < rows; col++) {
+    let pivot = -1;
+    for (let i = rank; i < rows; i++) {
+      if (Math.abs(a[i][col]) > 1e-10) { pivot = i; break; }
+    }
+    if (pivot === -1) continue;
+    if (pivot !== rank) { [a[rank], a[pivot]] = [a[pivot], a[rank]]; }
+    const pv = a[rank][col];
+    for (let j = col; j < cols; j++) a[rank][j] /= pv;
+    for (let i = 0; i < rows; i++) {
+      if (i === rank || Math.abs(a[i][col]) < 1e-10) continue;
+      const f = a[i][col];
+      for (let j = col; j < cols; j++) a[i][j] -= f * a[rank][j];
+    }
+    rank++;
+  }
+  return { rank, ref: a };
+}
+
+function inverseM(m) {
+  const n = m.length;
+  if (n !== m[0].length) throw new Error('Обратная матрица определена только для квадратных матриц');
+  const d = det(m);
+  if (Math.abs(d) < 1e-10) throw new Error('Матрица вырождена (det = 0), обратная матрица не существует');
+  // Adjugate method
+  const adj = Array.from({length: n}, () => Array(n).fill(0));
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++)
+      adj[j][i] = ((i + j) % 2 === 0 ? 1 : -1) * det(minor(m, i, j));
+  return { inv: adj.map(r => r.map(v => v / d)), det: d, adj };
+}
+
+// ============ RESULT OUTPUT ============
+const R = document.getElementById('result');
+function showResult(html) { R.innerHTML = html; }
+function step(text) { return `<div class="step">${text}</div>`; }
+function final(text) { return `<div class="final">${text}</div>`; }
+function error(text) { return `<div class="error">❌ ${text}</div>`; }
+function pre(text) { return `<pre style="margin:0;font-size:.85rem">${text}</pre>`; }
+
+// ============ MATRIX OPERATIONS HANDLER ============
+function matOp(op) {
+  try {
+    let html = '';
+    const A = readMatrix('ma');
+    if (op === 'add') {
+      const B = readMatrix('mb');
+      html += step('Операция: A + B');
+      html += step(pre(matStr(A, 'A')));
+      html += step(pre(matStr(B, 'B')));
+      const res = addM(A, B);
+      html += final(pre(matStr(res, 'A + B')));
+    } else if (op === 'sub') {
+      const B = readMatrix('mb');
+      html += step('Операция: A − B');
+      html += step(pre(matStr(A, 'A')));
+      html += step(pre(matStr(B, 'B')));
+      const res = subM(A, B);
+      html += final(pre(matStr(res, 'A − B')));
+    } else if (op === 'smul') {
+      const k = parseFloat(document.getElementById('scalar-k').value);
+      if (isNaN(k)) throw new Error('Некорректное значение скаляра');
+      html += step(`Операция: ${fmt(k)} × A`);
+      html += step(pre(matStr(A, 'A')));
+      const res = smulM(k, A);
+      html += final(pre(matStr(res, `${fmt(k)}·A`)));
+    } else if (op === 'mul') {
+      const B = readMatrix('mb');
+      html += step(`Операция: A(${A.length}×${A[0].length}) × B(${B.length}×${B[0].length})`);
+      html += step(pre(matStr(A, 'A')));
+      html += step(pre(matStr(B, 'B')));
+      const res = mulM(A, B);
+      html += final(pre(matStr(res, 'A × B')));
+    } else if (op === 'trans') {
+      html += step('Операция: Транспонирование A');
+      html += step(pre(matStr(A, 'A')));
+      const res = transM(A);
+      html += final(pre(matStr(res, 'Aᵀ')));
+    } else if (op === 'det') {
+      if (A.length !== A[0].length) throw new Error('Определитель определён только для квадратных матриц');
+      html += step('Операция: det(A)');
+      html += step(pre(matStr(A, 'A')));
+      // Show steps for small matrices
+      const n = A.length;
+      if (n === 2) {
+        html += step(`det(A) = ${fmt(A[0][0])}·${fmt(A[1][1])} − ${fmt(A[0][1])}·${fmt(A[1][0])}`);
+        html += step(`det(A) = ${fmt(A[0][0]*A[1][1])} − ${fmt(A[0][1]*A[1][0])}`);
+      } else if (n === 3) {
+        html += step('Разложение по первой строке:');
+        for (let j = 0; j < 3; j++) {
+          const sign = j % 2 === 0 ? '+' : '−';
+          const m = minor(A, 0, j);
+          html += step(`${sign} ${fmt(A[0][j])} · M₁${j+1} = ${sign} ${fmt(A[0][j])} · det${pre(matStr(m,''))}`);
+        }
+      }
+      const d = det(A);
+      html += final(`det(A) = ${fmt(d)}`);
+    } else if (op === 'rank') {
+      html += step('Операция: rank(A)');
+      html += step(pre(matStr(A, 'A')));
+      html += step('Приведение к ступенчатому виду...');
+      const { rank: r, ref } = rankM(A);
+      html += step('Ступенчатая форма:');
+      html += step(pre(matStr(ref, 'REF')));
+      html += final(`rank(A) = ${r}`);
+    } else if (op === 'inv') {
+      html += step('Операция: A⁻¹ (метод алгебраических дополнений)');
+      html += step(pre(matStr(A, 'A')));
+      const { inv, det: d, adj } = inverseM(A);
+      html += step(`det(A) = ${fmt(d)}`);
+      html += step(pre(matStr(adj, 'Adj(A)')));
+      html += step(`A⁻¹ = (1/${fmt(d)}) · Adj(A)`);
+      html += final(pre(matStr(inv, 'A⁻¹')));
+      // Verify
+      html += step('Проверка: A · A⁻¹ =');
+      html += step(pre(matStr(mulM(A, inv), 'A·A⁻¹')));
+    }
+    showResult(html);
+  } catch (e) { showResult(error(e.message)); }
+}
+
+// ============ SLAU SOLVER ============
+function slauSolve(method) {
+  try {
+    const { A, b, n } = readSlau();
+    let html = '';
+    html += step(`Система ${n} уравнений, ${n} неизвестных`);
+    // Show system
+    let sysStr = '';
+    for (let i = 0; i < n; i++) {
+      let eq = '';
+      for (let j = 0; j < n; j++) {
+        if (j > 0 && A[i][j] >= 0) eq += ' + ';
+        else if (j > 0) eq += ' − ';
+        const av = j > 0 ? Math.abs(A[i][j]) : A[i][j];
+        eq += `${fmt(av)}·x${j+1}`;
+      }
+      sysStr += eq + ` = ${fmt(b[i])}\n`;
+    }
+    html += step(pre(sysStr));
+
+    if (method === 'gauss') {
+      html += step('<b>Метод Гаусса (с выбором ведущего элемента)</b>');
+      // Augmented matrix
+      const aug = A.map((r, i) => [...r, b[i]]);
+      html += step('Расширенная матрица:');
+      html += step(pre(matStr(aug, '[A|b]')));
+
+      // Forward elimination
+      for (let col = 0; col < n; col++) {
+        // Partial pivoting
+        let maxRow = col, maxVal = Math.abs(aug[col][col]);
+        for (let i = col + 1; i < n; i++) {
+          if (Math.abs(aug[i][col]) > maxVal) { maxVal = Math.abs(aug[i][col]); maxRow = i; }
+        }
+        if (maxVal < 1e-10) throw new Error('Система не имеет единственного решения (вырожденная матрица)');
+        if (maxRow !== col) {
+          [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+          html += step(`Перестановка строк ${col+1} и ${maxRow+1}`);
+        }
+        // Eliminate below
+        for (let i = col + 1; i < n; i++) {
+          const f = aug[i][col] / aug[col][col];
+          html += step(`R${i+1} ← R${i+1} − (${fmt(f)})·R${col+1}`);
+          for (let j = col; j <= n; j++) aug[i][j] -= f * aug[col][j];
+        }
+        html += step(pre(matStr(aug, `Шаг ${col+1}`)));
+      }
+
+      // Back substitution
+      html += step('<b>Обратный ход:</b>');
+      const x = Array(n).fill(0);
+      for (let i = n - 1; i >= 0; i--) {
+        let sum = aug[i][n];
+        let expr = fmt(aug[i][n]);
+        for (let j = i + 1; j < n; j++) {
+          sum -= aug[i][j] * x[j];
+          expr += ` − ${fmt(aug[i][j])}·${fmt(x[j])}`;
+        }
+        x[i] = sum / aug[i][i];
+        html += step(`x${i+1} = (${expr}) / ${fmt(aug[i][i])} = ${fmt(x[i])}`);
+      }
+      html += final('Решение: ' + x.map((v, i) => `x${i+1} = ${fmt(v)}`).join(', '));
+
+    } else if (method === 'cramer') {
+      html += step('<b>Метод Крамера</b>');
+      const D = det(A);
+      html += step(pre(matStr(A, 'A')));
+      html += step(`Δ = det(A) = ${fmt(D)}`);
+      if (Math.abs(D) < 1e-10) throw new Error('Определитель системы равен 0. Метод Крамера неприменим');
+
+      const x = [];
+      for (let j = 0; j < n; j++) {
+        const Aj = A.map((r, i) => r.map((v, k) => k === j ? b[i] : v));
+        const Dj = det(Aj);
+        html += step(pre(matStr(Aj, `A${j+1}`)));
+        html += step(`Δ${j+1} = det(A${j+1}) = ${fmt(Dj)}`);
+        x[j] = Dj / D;
+        html += step(`x${j+1} = Δ${j+1} / Δ = ${fmt(Dj)} / ${fmt(D)} = ${fmt(x[j])}`);
+      }
+      html += final('Решение: ' + x.map((v, i) => `x${i+1} = ${fmt(v)}`).join(', '));
+
+    } else if (method === 'matrix') {
+      html += step('<b>Матричный метод (X = A⁻¹ · b)</b>');
+      const { inv, det: d, adj } = inverseM(A);
+      html += step(`det(A) = ${fmt(d)}`);
+      html += step(pre(matStr(adj, 'Adj(A)')));
+      html += step(pre(matStr(inv, 'A⁻¹')));
+
+      // Multiply A⁻¹ by b (column vector)
+      const bCol = b.map(v => [v]);
+      const xCol = mulM(inv, bCol);
+      const x = xCol.map(r => r[0]);
+
+      html += step('X = A⁻¹ · b:');
+      html += final('Решение: ' + x.map((v, i) => `x${i+1} = ${fmt(v)}`).join(', '));
+
+      // Verify
+      const check = mulM(A, xCol).map(r => r[0]);
+      html += step('Проверка: A · X = ' + vecStr(check, 'b'));
+    }
+    showResult(html);
+  } catch (e) { showResult(error(e.message)); }
+}
+
+// ============ VECTOR OPERATIONS ============
+function vecOp(op) {
+  try {
+    let html = '';
+    const a = readVec('vec-a');
+    const dim = a.length;
+
+    if (op === 'add') {
+      const b = readVec('vec-b');
+      if (a.length !== b.length) throw new Error('Размерности векторов не совпадают');
+      html += step(`${vecStr(a, 'a⃗')}  +  ${vecStr(b, 'b⃗')}`);
+      const res = a.map((v, i) => v + b[i]);
+      html += final(vecStr(res, 'a⃗ + b⃗'));
+    } else if (op === 'sub') {
+      const b = readVec('vec-b');
+      if (a.length !== b.length) throw new Error('Размерности векторов не совпадают');
+      html += step(`${vecStr(a, 'a⃗')}  −  ${vecStr(b, 'b⃗')}`);
+      const res = a.map((v, i) => v - b[i]);
+      html += final(vecStr(res, 'a⃗ − b⃗'));
+    } else if (op === 'smul') {
+      const k = parseFloat(document.getElementById('vec-scalar-k').value);
+      if (isNaN(k)) throw new Error('Некорректное значение скаляра');
+      html += step(`${fmt(k)} × ${vecStr(a, 'a⃗')}`);
+      const res = a.map(v => v * k);
+      html += final(vecStr(res, 'k·a⃗'));
+    } else if (op === 'dot') {
+      const b = readVec('vec-b');
+      if (a.length !== b.length) throw new Error('Размерности векторов не совпадают');
+      html += step(`${vecStr(a, 'a⃗')} · ${vecStr(b, 'b⃗')}`);
+      const terms = a.map((v, i) => `${fmt(v)}·${fmt(b[i])}`).join(' + ');
+      html += step(terms);
+      const res = a.reduce((s, v, i) => s + v * b[i], 0);
+      html += final(`(a⃗, b⃗) = ${fmt(res)}`);
+    } else if (op === 'cross') {
+      if (dim !== 3) throw new Error('Векторное произведение определено только для 3D-векторов');
+      const b = readVec('vec-b');
+      html += step(`${vecStr(a, 'a⃗')} × ${vecStr(b, 'b⃗')}`);
+      const res = [
+        a[1]*b[2] - a[2]*b[1],
+        a[2]*b[0] - a[0]*b[2],
+        a[0]*b[1] - a[1]*b[0]
+      ];
+      html += step(`i: ${fmt(a[1])}·${fmt(b[2])} − ${fmt(a[2])}·${fmt(b[1])} = ${fmt(res[0])}`);
+      html += step(`j: ${fmt(a[2])}·${fmt(b[0])} − ${fmt(a[0])}·${fmt(b[2])} = ${fmt(res[1])}`);
+      html += step(`k: ${fmt(a[0])}·${fmt(b[1])} − ${fmt(a[1])}·${fmt(b[0])} = ${fmt(res[2])}`);
+      html += final(vecStr(res, '[a⃗ × b⃗]'));
+    } else if (op === 'mixed') {
+      if (dim !== 3) throw new Error('Смешанное произведение определено только для 3D-векторов');
+      const b = readVec('vec-b');
+      const c = readVec('vec-c');
+      html += step(`${vecStr(a, 'a⃗')}, ${vecStr(b, 'b⃗')}, ${vecStr(c, 'c⃗')}`);
+      html += step('(a⃗, b⃗, c⃗) = det | a⃗ ; b⃗ ; c⃗ |');
+      const m = [a, b, c];
+      html += step(pre(matStr(m, '')));
+      const d = det(m);
+      html += step(`= ${fmt(a[0])}(${fmt(b[1])}·${fmt(c[2])} − ${fmt(b[2])}·${fmt(c[1])}) − ${fmt(a[1])}(${fmt(b[0])}·${fmt(c[2])} − ${fmt(b[2])}·${fmt(c[0])}) + ${fmt(a[2])}(${fmt(b[0])}·${fmt(c[1])} − ${fmt(b[1])}·${fmt(c[0])})`);
+      html += final(`(a⃗, b⃗, c⃗) = ${fmt(d)}`);
+    }
+    showResult(html);
+  } catch (e) { showResult(error(e.message)); }
+}
+
+// ============ INIT ============
+buildMatrixGrid('ma');
+buildMatrixGrid('mb');
+buildSlauGrid();
+buildVecInputs();
+</script>
+</body>
+</html>
