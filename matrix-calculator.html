@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Матричный Калькулятор</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================= */
+    /* БАЗОВЫЕ СТИЛИ И ДИЗАЙН-СИСТЕМА               */
+    /* ============================================= */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #06060a;
+      color: #e0e0e0;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 1rem; color: #c0c0c0; }
+    h3 { font-size: 1rem; font-weight: 600; margin: 1rem 0 0.75rem; }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* Шапка */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .header p { color: rgba(255,255,255,0.4); font-size: 0.9rem; margin-top: 0.25rem; }
+
+    /* Карточка */
+    .card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ============================================= */
+    /* ВКЛАДКИ                                       */
+    /* ============================================= */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 0;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.25s ease;
+      position: relative;
+      bottom: -1px;
+    }
+    .tab-btn:hover { color: rgba(255,255,255,0.7); }
+    .tab-btn.active {
+      color: #ffffff;
+      border-bottom: 2px solid #7c5cfc;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ============================================= */
+    /* КНОПКИ                                        */
+    /* ============================================= */
+    .btn {
+      background: linear-gradient(135deg, #7c5cfc, #4a8cff);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.4rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(124,92,252,0.35);
+    }
+    .btn:active { transform: translateY(0); }
+
+    .btn-sm {
+      padding: 0.4rem 1rem;
+      font-size: 0.82rem;
+      border-radius: 6px;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(124,92,252,0.4);
+      color: #a78bfa;
+    }
+    .btn-outline:hover {
+      background: rgba(124,92,252,0.1);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn-group { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+
+    /* ============================================= */
+    /* ПОЛЯ ВВОДА                                    */
+    /* ============================================= */
+    select, input[type="number"] {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #e0e0e0;
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    select:focus, input[type="number"]:focus {
+      border-color: rgba(124,92,252,0.5);
+    }
+    select { cursor: pointer; }
+
+    /* Матричный грид ввода */
+    .matrix-grid {
+      display: inline-grid;
+      gap: 4px;
+      margin: 0.75rem 0;
+      padding: 0.75rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      position: relative;
+    }
+    /* Скобки матрицы */
+    .matrix-grid::before,
+    .matrix-grid::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      width: 4px;
+      border: 2px solid rgba(124,92,252,0.4);
+    }
+    .matrix-grid::before { left: 2px; border-right: none; border-radius: 4px 0 0 4px; }
+    .matrix-grid::after { right: 2px; border-left: none; border-radius: 0 4px 4px 0; }
+
+    .matrix-grid input {
+      width: 45px;
+      height: 34px;
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 500;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #fff;
+      border-radius: 6px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .matrix-grid input:focus {
+      border-color: #7c5cfc;
+      background: rgba(124,92,252,0.08);
+      box-shadow: 0 0 0 2px rgba(124,92,252,0.15);
+    }
+    /* Убираем стрелки в input[number] */
+    .matrix-grid input::-webkit-outer-spin-button,
+    .matrix-grid input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .matrix-grid input[type=number] { -moz-appearance: textfield; }
+
+    /* Контейнер для двух матриц рядом */
+    .matrices-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 1.5rem;
+      overflow-x: auto;
+    }
+    .matrix-block { display: flex; flex-direction: column; align-items: flex-start; }
+    .matrix-block label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+
+    /* Управление размерностью */
+    .size-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .size-controls label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+    }
+
+    /* ============================================= */
+    /* РЕЗУЛЬТАТЫ И ШАГИ                             */
+    /* ============================================= */
+    .result-area {
+      margin-top: 1.5rem;
+    }
+    .result-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #a78bfa;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .result-matrix {
+      display: inline-grid;
+      gap: 2px;
+      padding: 0.75rem;
+      background: rgba(124,92,252,0.05);
+      border: 1px solid rgba(124,92,252,0.15);
+      border-radius: 10px;
+      position: relative;
+      margin: 0.5rem 0;
+    }
+    .result-matrix::before,
+    .result-matrix::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      width: 4px;
+      border: 2px solid rgba(124,92,252,0.5);
+    }
+    .result-matrix::before { left: 2px; border-right: none; border-radius: 4px 0 0 4px; }
+    .result-matrix::after { right: 2px; border-left: none; border-radius: 0 4px 4px 0; }
+
+    .result-matrix .cell {
+      width: 50px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .result-scalar {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #7c5cfc;
+      padding: 0.5rem 0;
+    }
+
+    /* Промежуточные шаги */
+    .steps {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+    }
+    .steps-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      color: #a78bfa;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .steps-title:hover { color: #c4b5fd; }
+    .step {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+    .step:last-child { border-bottom: none; }
+    .step strong { color: #a78bfa; }
+    .step .formula {
+      font-family: 'Space Grotesk', monospace;
+      color: #e0e0e0;
+      background: rgba(255,255,255,0.03);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    .step-matrix {
+      display: inline-grid;
+      gap: 1px;
+      padding: 0.4rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 6px;
+      margin: 0.4rem 0;
+      vertical-align: middle;
+    }
+    .step-matrix .cell {
+      width: 42px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.72rem;
+      color: #c0c0c0;
+    }
+
+    /* Ошибки */
+    .error-msg {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: #ef4444;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    /* Успех / Инфо */
+    .info-msg {
+      background: rgba(124,92,252,0.08);
+      border: 1px solid rgba(124,92,252,0.2);
+      color: #a78bfa;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Вектор-ввод */
+    .vector-inputs {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin: 0.5rem 0;
+    }
+    .vector-inputs input {
+      width: 65px;
+      height: 40px;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #fff;
+      border-radius: 6px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .vector-inputs input:focus {
+      border-color: #7c5cfc;
+      background: rgba(124,92,252,0.08);
+    }
+    .vector-inputs input::-webkit-outer-spin-button,
+    .vector-inputs input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .vector-inputs input[type=number] { -moz-appearance: textfield; }
+    .vector-bracket {
+      font-size: 2rem;
+      color: rgba(124,92,252,0.5);
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    /* СЛАУ — уравнения */
+    .slau-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin: 3px 0;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .slau-row input {
+      width: 45px;
+      height: 32px;
+      text-align: center;
+      font-size: 0.8rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #fff;
+      border-radius: 6px;
+      outline: none;
+    }
+    .slau-row input:focus { border-color: #7c5cfc; }
+    .slau-row span {
+      color: rgba(255,255,255,0.4);
+      font-size: 0.9rem;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .slau-row input::-webkit-outer-spin-button,
+    .slau-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .slau-row input[type=number] { -moz-appearance: textfield; }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .matrices-row { flex-direction: column; }
+      .matrix-grid input { width: 36px; height: 30px; font-size: 0.72rem; }
+      .result-matrix .cell { width: 38px; height: 26px; font-size: 0.7rem; }
+    }
+
+    /* Скрытие/показ шагов */
+    .steps-body { display: none; }
+    .steps-body.open { display: block; }
+
+    /* Разделитель */
+    .sep { color: rgba(255,255,255,0.2); font-size: 1.5rem; margin: 0 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Шапка -->
+    <div class="header">
+      <h1>📐 Матричный Калькулятор</h1>
+      <p>Операции над матрицами • Решение СЛАУ • Векторные операции</p>
+    </div>
+
+    <!-- Вкладки -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('matrices')">Матрицы</button>
+      <button class="tab-btn" onclick="switchTab('slau')">СЛАУ</button>
+      <button class="tab-btn" onclick="switchTab('vectors')">Векторы</button>
+    </div>
+
+    <!-- =========================================== -->
+    <!-- ВКЛАДКА: МАТРИЦЫ                            -->
+    <!-- =========================================== -->
+    <div id="tab-matrices" class="tab-content active">
+      <div class="card">
+        <h2>Выберите операцию</h2>
+        <div class="btn-group">
+          <button class="btn btn-sm" onclick="setMatOp('add')">A + B</button>
+          <button class="btn btn-sm" onclick="setMatOp('sub')">A − B</button>
+          <button class="btn btn-sm" onclick="setMatOp('mulNum')">A × k</button>
+          <button class="btn btn-sm" onclick="setMatOp('mul')">A × B</button>
+          <button class="btn btn-sm" onclick="setMatOp('trans')">Aᵀ</button>
+          <button class="btn btn-sm" onclick="setMatOp('det')">det(A)</button>
+          <button class="btn btn-sm" onclick="setMatOp('rank')">rank(A)</button>
+        </div>
+
+        <!-- Размерности -->
+        <div id="mat-sizes"></div>
+
+        <!-- Ввод матриц -->
+        <div id="mat-inputs" class="matrices-row"></div>
+
+        <!-- Кнопка вычислить -->
+        <div style="margin-top:1rem;">
+          <button class="btn" onclick="calcMatrix()">Вычислить</button>
+          <button class="btn btn-outline btn-sm" onclick="clearMatInputs()" style="margin-left:0.5rem;">Очистить</button>
+        </div>
+      </div>
+
+      <!-- Результат -->
+      <div id="mat-result" class="result-area"></div>
+    </div>
+
+    <!-- =========================================== -->
+    <!-- ВКЛАДКА: СЛАУ                               -->
+    <!-- =========================================== -->
+    <div id="tab-slau" class="tab-content">
+      <div class="card">
+        <h2>Система линейных алгебраических уравнений</h2>
+        <div class="size-controls">
+          <label>Количество уравнений / неизвестных:</label>
+          <select id="slau-n" onchange="buildSlau()">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+          </select>
+        </div>
+
+        <div id="slau-inputs"></div>
+
+        <h3 style="margin-top:1rem;">Метод решения</h3>
+        <div class="btn-group">
+          <button class="btn btn-sm" onclick="solveSlau('gauss')">Метод Гаусса</button>
+          <button class="btn btn-sm" onclick="solveSlau('cramer')">Метод Крамера</button>
+          <button class="btn btn-sm" onclick="solveSlau('matrix')">Матричный метод</button>
+        </div>
+
+        <button class="btn btn-outline btn-sm" onclick="clearSlau()" style="margin-top:0.5rem;">Очистить</button>
+      </div>
+
+      <div id="slau-result" class="result-area"></div>
+    </div>
+
+    <!-- =========================================== -->
+    <!-- ВКЛАДКА: ВЕКТОРЫ                            -->
+    <!-- =========================================== -->
+    <div id="tab-vectors" class="tab-content">
+      <div class="card">
+        <h2>Операции над векторами</h2>
+        <div class="btn-group">
+          <button class="btn btn-sm" onclick="setVecOp('add')">a⃗ + b⃗</button>
+          <button class="btn btn-sm" onclick="setVecOp('sub')">a⃗ − b⃗</button>
+          <button class="btn btn-sm" onclick="setVecOp('mulNum')">a⃗ × k</button>
+          <button class="btn btn-sm" onclick="setVecOp('dot')">Скалярное (a⃗·b⃗)</button>
+          <button class="btn btn-sm" onclick="setVecOp('cross')">Векторное [a⃗×b⃗]</button>
+          <button class="btn btn-sm" onclick="setVecOp('mixed')">Смешанное (a⃗,b⃗,c⃗)</button>
+        </div>
+
+        <div id="vec-sizes" class="size-controls" style="margin-top:1rem;"></div>
+        <div id="vec-inputs"></div>
+
+        <div style="margin-top:1rem;">
+          <button class="btn" onclick="calcVector()">Вычислить</button>
+          <button class="btn btn-outline btn-sm" onclick="clearVecInputs()" style="margin-left:0.5rem;">Очистить</button>
+        </div>
+      </div>
+
+      <div id="vec-result" class="result-area"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ========================================================= */
+    /*  МАТРИЧНЫЙ КАЛЬКУЛЯТОР — JavaScript                       */
+    /*  Все вычисления реализованы вручную, без внешних библиотек */
+    /* ========================================================= */
+
+    // ==========================================
+    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    // ==========================================
+
+    /** Округление числа для красивого вывода */
+    function fmt(x) {
+      if (Math.abs(x) < 1e-12) return '0';
+      // Если число целое — выводим без дробной части
+      if (Number.isInteger(x)) return String(x);
+      // Проверяем, является ли число «почти целым»
+      if (Math.abs(x - Math.round(x)) < 1e-9) return String(Math.round(x));
+      // Иначе — до 4 знаков, убирая хвостовые нули
+      let s = x.toFixed(4);
+      s = s.replace(/\.?0+$/, '');
+      return s;
+    }
+
+    /** Глубокое копирование двумерного массива */
+    function copyMatrix(m) {
+      return m.map(row => [...row]);
+    }
+
+    /** Считывание матрицы из полей ввода */
+    function readMatrix(prefix, rows, cols) {
+      const m = [];
+      for (let i = 0; i < rows; i++) {
+        const row = [];
+        for (let j = 0; j < cols; j++) {
+          const el = document.getElementById(`${prefix}_${i}_${j}`);
+          const val = parseFloat(el.value);
+          if (isNaN(val)) throw new Error(`Некорректное значение в ячейке (${i+1}, ${j+1}) матрицы ${prefix.toUpperCase()}`);
+          row.push(val);
+        }
+        m.push(row);
+      }
+      return m;
+    }
+
+    /** Генерация HTML матричного грида */
+    function matrixGridHTML(prefix, rows, cols) {
+      let html = `<div class="matrix-grid" style="grid-template-columns: repeat(${cols}, 45px);">`;
+      for (let i = 0; i < rows; i++)
+        for (let j = 0; j < cols; j++)
+          html += `<input type="number" id="${prefix}_${i}_${j}" step="any" value="0">`;
+      html += '</div>';
+      return html;
+    }
+
+    /** HTML для отображения результирующей матрицы */
+    function resultMatrixHTML(m) {
+      const rows = m.length, cols = m[0].length;
+      let html = `<div class="result-matrix" style="grid-template-columns: repeat(${cols}, 50px);">`;
+      for (let i = 0; i < rows; i++)
+        for (let j = 0; j < cols; j++)
+          html += `<div class="cell">${fmt(m[i][j])}</div>`;
+      html += '</div>';
+      return html;
+    }
+
+    /** HTML для отображения матрицы в шагах (компактная) */
+    function stepMatrixHTML(m) {
+      const rows = m.length, cols = m[0].length;
+      let html = `<div class="step-matrix" style="grid-template-columns: repeat(${cols}, 42px);">`;
+      for (let i = 0; i < rows; i++)
+        for (let j = 0; j < cols; j++)
+          html += `<div class="cell">${fmt(m[i][j])}</div>`;
+      html += '</div>';
+      return html;
+    }
+
+    /** Обёртка для блока промежуточных шагов (сворачиваемый) */
+    function stepsWrapHTML(title, bodyHTML) {
+      const id = 'steps_' + Math.random().toString(36).substr(2, 8);
+      return `<div class="steps">
+        <div class="steps-title" onclick="toggleSteps('${id}')">▸ ${title}</div>
+        <div class="steps-body open" id="${id}">${bodyHTML}</div>
+      </div>`;
+    }
+
+    function toggleSteps(id) {
+      const el = document.getElementById(id);
+      el.classList.toggle('open');
+      const title = el.previousElementSibling;
+      if (el.classList.contains('open')) title.textContent = title.textContent.replace('▸', '▾');
+      else title.textContent = title.textContent.replace('▾', '▸');
+    }
+
+
+    // ==========================================
+    // ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+    // ==========================================
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      // Кнопка — находим по тексту
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        if ((name === 'matrices' && b.textContent === 'Матрицы') ||
+            (name === 'slau' && b.textContent === 'СЛАУ') ||
+            (name === 'vectors' && b.textContent === 'Векторы'))
+          b.classList.add('active');
+      });
+    }
+
+
+    // ==========================================
+    // ВКЛАДКА: МАТРИЦЫ
+    // ==========================================
+
+    let matOp = 'add'; // текущая операция
+
+    function setMatOp(op) {
+      matOp = op;
+      buildMatInputs();
+    }
+
+    /** Построение управления размерностями и полей ввода */
+    function buildMatInputs() {
+      const sizesDiv = document.getElementById('mat-sizes');
+      const inputsDiv = document.getElementById('mat-inputs');
+      document.getElementById('mat-result').innerHTML = '';
+
+      let sizesHTML = '<div class="size-controls">';
+
+      // Операции с двумя матрицами
+      if (['add', 'sub', 'mul'].includes(matOp)) {
+        if (matOp === 'mul') {
+          // Умножение: A(rA x cA) × B(cA x cB)
+          sizesHTML += `
+            <label>Матрица A:</label>
+            <select id="mat-rA" onchange="rebuildMatGrids()">
+              ${sizeOptions(3)}</select> ×
+            <select id="mat-cA" onchange="rebuildMatGrids()">
+              ${sizeOptions(3)}</select>
+            <span class="sep">·</span>
+            <label>Матрица B:</label>
+            <select id="mat-rB" onchange="rebuildMatGrids()" disabled>
+              ${sizeOptions(3)}</select> ×
+            <select id="mat-cB" onchange="rebuildMatGrids()">
+              ${sizeOptions(3)}</select>`;
+        } else {
+          // Сложение/вычитание: одинаковые размеры
+          sizesHTML += `
+            <label>Размер матриц:</label>
+            <select id="mat-rA" onchange="rebuildMatGrids()">
+              ${sizeOptions(3)}</select> ×
+            <select id="mat-cA" onchange="rebuildMatGrids()">
+              ${sizeOptions(3)}</select>`;
+        }
+      } else if (matOp === 'mulNum') {
+        sizesHTML += `
+          <label>Размер матрицы:</label>
+          <select id="mat-rA" onchange="rebuildMatGrids()">
+            ${sizeOptions(3)}</select> ×
+          <select id="mat-cA" onchange="rebuildMatGrids()">
+            ${sizeOptions(3)}</select>
+          <span class="sep">·</span>
+          <label>k =</label>
+          <input type="number" id="mat-scalar" value="2" style="width:70px;">`;
+      } else {
+        // trans, det, rank — одна матрица
+        if (matOp === 'det' || matOp === 'rank') {
+          // Квадратная для det, любая для rank
+          if (matOp === 'det') {
+            sizesHTML += `
+              <label>Размер квадратной матрицы:</label>
+              <select id="mat-rA" onchange="rebuildMatGrids()">
+                ${sizeOptions(3)}</select>`;
+          } else {
+            sizesHTML += `
+              <label>Размер матрицы:</label>
+              <select id="mat-rA" onchange="rebuildMatGrids()">
+                ${sizeOptions(3)}</select> ×
+              <select id="mat-cA" onchange="rebuildMatGrids()">
+                ${sizeOptions(3)}</select>`;
+          }
+        } else {
+          // trans
+          sizesHTML += `
+            <label>Размер матрицы:</label>
+            <select id="mat-rA" onchange="rebuildMatGrids()">
+              ${sizeOptions(3)}</select> ×
+            <select id="mat-cA" onchange="rebuildMatGrids()">
+              ${sizeOptions(3)}</select>`;
+        }
+      }
+
+      sizesHTML += '</div>';
+      sizesDiv.innerHTML = sizesHTML;
+      rebuildMatGrids();
+    }
+
+    function sizeOptions(def) {
+      let html = '';
+      for (let i = 1; i <= 15; i++)
+        html += `<option value="${i}" ${i === def ? 'selected' : ''}>${i}</option>`;
+      return html;
+    }
+
+    function rebuildMatGrids() {
+      const inputsDiv = document.getElementById('mat-inputs');
+      let rA = parseInt(document.getElementById('mat-rA')?.value || 3);
+      let cA, rB, cB;
+
+      if (matOp === 'det') {
+        cA = rA; // квадратная
+      } else {
+        cA = parseInt(document.getElementById('mat-cA')?.value || 3);
+      }
+
+      let html = '';
+
+      if (['add', 'sub'].includes(matOp)) {
+        html += `<div class="matrix-block"><label>Матрица A</label>${matrixGridHTML('a', rA, cA)}</div>`;
+        html += `<div class="matrix-block"><label>Матрица B</label>${matrixGridHTML('b', rA, cA)}</div>`;
+      } else if (matOp === 'mul') {
+        rB = cA;
+        cB = parseInt(document.getElementById('mat-cB')?.value || 3);
+        // Синхронизируем rB
+        const rBSel = document.getElementById('mat-rB');
+        if (rBSel) rBSel.value = rB;
+        html += `<div class="matrix-block"><label>Матрица A (${rA}×${cA})</label>${matrixGridHTML('a', rA, cA)}</div>`;
+        html += `<div class="matrix-block"><label>Матрица B (${rB}×${cB})</label>${matrixGridHTML('b', rB, cB)}</div>`;
+      } else if (matOp === 'mulNum') {
+        html += `<div class="matrix-block"><label>Матрица A</label>${matrixGridHTML('a', rA, cA)}</div>`;
+      } else {
+        html += `<div class="matrix-block"><label>Матрица A</label>${matrixGridHTML('a', rA, cA)}</div>`;
+      }
+
+      inputsDiv.innerHTML = html;
+    }
+
+    function clearMatInputs() {
+      document.querySelectorAll('#mat-inputs input').forEach(el => el.value = '0');
+      document.getElementById('mat-result').innerHTML = '';
+    }
+
+    /** Главная функция вычисления матричных операций */
+    function calcMatrix() {
+      const resultDiv = document.getElementById('mat-result');
+      resultDiv.innerHTML = '';
+      try {
+        const rA = parseInt(document.getElementById('mat-rA')?.value || 3);
+        const cA = matOp === 'det' ? rA : parseInt(document.getElementById('mat-cA')?.value || 3);
+
+        const A = readMatrix('a', rA, cA);
+        let html = '';
+
+        switch (matOp) {
+          case 'add':
+          case 'sub': {
+            const B = readMatrix('b', rA, cA);
+            const R = [];
+            const sign = matOp === 'add' ? 1 : -1;
+            const opName = matOp === 'add' ? 'Сложение' : 'Вычитание';
+            const opSign = matOp === 'add' ? '+' : '−';
+            let steps = '';
+            for (let i = 0; i < rA; i++) {
+              R.push([]);
+              for (let j = 0; j < cA; j++) {
+                R[i][j] = A[i][j] + sign * B[i][j];
+                steps += `c<sub>${i+1}${j+1}</sub> = ${fmt(A[i][j])} ${opSign} ${fmt(B[i][j])} = ${fmt(R[i][j])}<br>`;
+              }
+            }
+            html += `<div class="card"><div class="result-title">✅ Результат: A ${opSign} B</div>`;
+            html += resultMatrixHTML(R);
+            html += stepsWrapHTML(`Промежуточные шаги (${opName})`, `<div class="step">${steps}</div>`);
+            html += '</div>';
+            break;
+          }
+
+          case 'mulNum': {
+            const k = parseFloat(document.getElementById('mat-scalar').value);
+            if (isNaN(k)) throw new Error('Введите корректное число k');
+            const R = [];
+            let steps = '';
+            for (let i = 0; i < rA; i++) {
+              R.push([]);
+              for (let j = 0; j < cA; j++) {
+                R[i][j] = A[i][j] * k;
+                steps += `c<sub>${i+1}${j+1}</sub> = ${fmt(k)} × ${fmt(A[i][j])} = ${fmt(R[i][j])}<br>`;
+              }
+            }
+            html += `<div class="card"><div class="result-title">✅ Результат: ${fmt(k)} × A</div>`;
+            html += resultMatrixHTML(R);
+            html += stepsWrapHTML('Промежуточные шаги (Умножение на число)', `<div class="step">${steps}</div>`);
+            html += '</div>';
+            break;
+          }
+
+          case 'mul': {
+            const rB = cA;
+            const cB = parseInt(document.getElementById('mat-cB').value);
+            const B = readMatrix('b', rB, cB);
+            const R = [];
+            let steps = '';
+            for (let i = 0; i < rA; i++) {
+              R.push([]);
+              for (let j = 0; j < cB; j++) {
+                let sum = 0;
+                let terms = [];
+                for (let k = 0; k < cA; k++) {
+                  sum += A[i][k] * B[k][j];
+                  terms.push(`${fmt(A[i][k])}·${fmt(B[k][j])}`);
+                }
+                R[i][j] = sum;
+                steps += `c<sub>${i+1}${j+1}</sub> = ${terms.join(' + ')} = ${fmt(sum)}<br>`;
+              }
+            }
+            html += `<div class="card"><div class="result-title">✅ Результат: A × B (${rA}×${cB})</div>`;
+            html += resultMatrixHTML(R);
+            html += stepsWrapHTML('Промежуточные шаги (Умножение матриц)', `<div class="step">${steps}</div>`);
+            html += '</div>';
+            break;
+          }
+
+          case 'trans': {
+            const R = [];
+            let steps = '';
+            for (let j = 0; j < cA; j++) {
+              R.push([]);
+              for (let i = 0; i < rA; i++) {
+                R[j][i] = A[i][j];
+                steps += `a<sup>T</sup><sub>${j+1}${i+1}</sub> = a<sub>${i+1}${j+1}</sub> = ${fmt(A[i][j])}<br>`;
+              }
+            }
+            html += `<div class="card"><div class="result-title">✅ Результат: Aᵀ (${cA}×${rA})</div>`;
+            html += resultMatrixHTML(R);
+            html += stepsWrapHTML('Промежуточные шаги (Транспонирование)', `<div class="step">Меняем строки и столбцы местами:<br>${steps}</div>`);
+            html += '</div>';
+            break;
+          }
+
+          case 'det': {
+            if (rA !== cA) throw new Error('Определитель вычисляется только для квадратных матриц');
+            let steps = [];
+            const d = determinant(A, steps);
+            html += `<div class="card"><div class="result-title">✅ Определитель: det(A)</div>`;
+            html += `<div class="result-scalar">${fmt(d)}</div>`;
+            html += stepsWrapHTML('Промежуточные шаги (Определитель)', steps.join(''));
+            html += '</div>';
+            break;
+          }
+
+          case 'rank': {
+            let steps = [];
+            const r = matrixRank(A, steps);
+            html += `<div class="card"><div class="result-title">✅ Ранг матрицы: rank(A)</div>`;
+            html += `<div class="result-scalar">${r}</div>`;
+            html += stepsWrapHTML('Промежуточные шаги (Ранг)', steps.join(''));
+            html += '</div>';
+            break;
+          }
+        }
+
+        resultDiv.innerHTML = html;
+      } catch (e) {
+        resultDiv.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
+      }
+    }
+
+
+    // ==========================================
+    // ОПРЕДЕЛИТЕЛЬ (рекурсивно, с разложением по 1-й строке)
+    // ==========================================
+    function determinant(m, steps, depth) {
+      depth = depth || 0;
+      const n = m.length;
+      const indent = '&nbsp;'.repeat(depth * 4);
+
+      if (n === 1) {
+        steps.push(`<div class="step">${indent}det = ${fmt(m[0][0])}</div>`);
+        return m[0][0];
+      }
+
+      if (n === 2) {
+        const d = m[0][0] * m[1][1] - m[0][1] * m[1][0];
+        steps.push(`<div class="step">${indent}det = ${fmt(m[0][0])}·${fmt(m[1][1])} − ${fmt(m[0][1])}·${fmt(m[1][0])} = ${fmt(d)}</div>`);
+        return d;
+      }
+
+      // Разложение по первой строке
+      let d = 0;
+      let terms = [];
+      steps.push(`<div class="step">${indent}<strong>Разложение по 1-й строке (${n}×${n}):</strong></div>`);
+
+      for (let j = 0; j < n; j++) {
+        // Минор M_{0,j}
+        const minor = [];
+        for (let i = 1; i < n; i++) {
+          const row = [];
+          for (let k = 0; k < n; k++) {
+            if (k !== j) row.push(m[i][k]);
+          }
+          minor.push(row);
+        }
+        const sign = (j % 2 === 0) ? 1 : -1;
+        const cofSign = sign === 1 ? '+' : '−';
+
+        steps.push(`<div class="step">${indent}A<sub>1${j+1}</sub> = ${cofSign}${fmt(Math.abs(m[0][j]))} · M<sub>1${j+1}</sub></div>`);
+
+        const minorDet = determinant(minor, steps, depth + 1);
+        const term = sign * m[0][j] * minorDet;
+        d += term;
+        terms.push(`(${cofSign}${fmt(Math.abs(m[0][j]))}·${fmt(minorDet)})`);
+      }
+
+      steps.push(`<div class="step">${indent}<strong>det = ${terms.join(' + ')} = ${fmt(d)}</strong></div>`);
+      return d;
+    }
+
+
+    // ==========================================
+    // РАНГ МАТРИЦЫ (метод Гаусса)
+    // ==========================================
+    function matrixRank(m, steps) {
+      const M = copyMatrix(m);
+      const rows = M.length, cols = M[0].length;
+      steps.push(`<div class="step"><strong>Исходная матрица:</strong><br>${stepMatrixHTML(M)}</div>`);
+
+      let rank = 0;
+      let stepNum = 0;
+
+      for (let col = 0; col < cols && rank < rows; col++) {
+        // Ищем ведущий элемент
+        let pivotRow = -1;
+        for (let i = rank; i < rows; i++) {
+          if (Math.abs(M[i][col]) > 1e-12) { pivotRow = i; break; }
+        }
+        if (pivotRow === -1) continue;
+
+        // Меняем строки
+        if (pivotRow !== rank) {
+          [M[rank], M[pivotRow]] = [M[pivotRow], M[rank]];
+          stepNum++;
+          steps.push(`<div class="step"><strong>Шаг ${stepNum}:</strong> Меняем строки ${rank+1} и ${pivotRow+1}<br>${stepMatrixHTML(M)}</div>`);
+        }
+
+        // Обнуляем элементы ниже
+        const pivot = M[rank][col];
+        for (let i = rank + 1; i < rows; i++) {
+          if (Math.abs(M[i][col]) > 1e-12) {
+            const factor = M[i][col] / pivot;
+            for (let j = col; j < cols; j++) {
+              M[i][j] -= factor * M[rank][j];
+            }
+            stepNum++;
+            steps.push(`<div class="step"><strong>Шаг ${stepNum}:</strong> R<sub>${i+1}</sub> = R<sub>${i+1}</sub> − (${fmt(factor)})·R<sub>${rank+1}</sub><br>${stepMatrixHTML(M)}</div>`);
+          }
+        }
+        rank++;
+      }
+
+      steps.push(`<div class="step"><strong>Ступенчатая форма получена. Количество ненулевых строк = ${rank}</strong></div>`);
+      return rank;
+    }
+
+
+    // ==========================================
+    // ОБРАТНАЯ МАТРИЦА (метод Гаусса-Жордана)
+    // ==========================================
+    function inverseMatrix(m, steps) {
+      const n = m.length;
+      // Проверяем квадратность
+      if (m[0].length !== n) throw new Error('Матрица должна быть квадратной для нахождения обратной');
+
+      // Расширенная матрица [A | E]
+      const aug = [];
+      for (let i = 0; i < n; i++) {
+        aug.push([...m[i]]);
+        for (let j = 0; j < n; j++) {
+          aug[i].push(i === j ? 1 : 0);
+        }
+      }
+
+      steps.push(`<div class="step"><strong>Расширенная матрица [A | E]:</strong><br>${stepAugMatrixHTML(aug, n)}</div>`);
+
+      let stepNum = 0;
+
+      // Прямой ход
+      for (let col = 0; col < n; col++) {
+        // Ищем максимальный элемент в столбце (частичный выбор ведущего)
+        let maxRow = col;
+        for (let i = col + 1; i < n; i++) {
+          if (Math.abs(aug[i][col]) > Math.abs(aug[maxRow][col])) maxRow = i;
+        }
+        if (Math.abs(aug[maxRow][col]) < 1e-12) {
+          throw new Error('Матрица вырожденная (det = 0), обратная не существует');
+        }
+        if (maxRow !== col) {
+          [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+          stepNum++;
+          steps.push(`<div class="step"><strong>Шаг ${stepNum}:</strong> Меняем строки ${col+1} и ${maxRow+1}<br>${stepAugMatrixHTML(aug, n)}</div>`);
+        }
+
+        // Делим строку на ведущий элемент
+        const pivot = aug[col][col];
+        for (let j = 0; j < 2 * n; j++) aug[col][j] /= pivot;
+        stepNum++;
+        steps.push(`<div class="step"><strong>Шаг ${stepNum}:</strong> R<sub>${col+1}</sub> = R<sub>${col+1}</sub> / ${fmt(pivot)}<br>${stepAugMatrixHTML(aug, n)}</div>`);
+
+        // Обнуляем весь столбец
+        for (let i = 0; i < n; i++) {
+          if (i !== col && Math.abs(aug[i][col]) > 1e-12) {
+            const factor = aug[i][col];
+            for (let j = 0; j < 2 * n; j++) aug[i][j] -= factor * aug[col][j];
+            stepNum++;
+            steps.push(`<div class="step"><strong>Шаг ${stepNum}:</strong> R<sub>${i+1}</sub> = R<sub>${i+1}</sub> − (${fmt(factor)})·R<sub>${col+1}</sub><br>${stepAugMatrixHTML(aug, n)}</div>`);
+          }
+        }
+      }
+
+      // Извлекаем обратную матрицу
+      const inv = [];
+      for (let i = 0; i < n; i++) {
+        inv.push(aug[i].slice(n));
+      }
+      return inv;
+    }
+
+    /** HTML расширенной матрицы [A | B] */
+    function stepAugMatrixHTML(aug, n) {
+      const rows = aug.length, cols = aug[0].length;
+      let html = `<div class="step-matrix" style="grid-template-columns: repeat(${cols}, 42px);">`;
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          const borderStyle = (j === n - 1) ? 'border-right: 2px solid rgba(124,92,252,0.4);' : '';
+          html += `<div class="cell" style="${borderStyle}">${fmt(aug[i][j])}</div>`;
+        }
+      }
+      html += '</div>';
+      return html;
+    }
+
+
+    // ==========================================
+    // ВКЛАДКА: СЛАУ
+    // ==========================================
+
+    /** Построение полей ввода СЛАУ */
+    function buildSlau() {
+      const n = parseInt(document.getElementById('slau-n').value);
+      const div = document.getElementById('slau-inputs');
+      document.getElementById('slau-result').innerHTML = '';
+
+      let html = '<div style="margin-top:0.75rem;">';
+      const varNames = ['x₁', 'x₂', 'x₃', 'x₄', 'x₅', 'x₆', 'x₇', 'x₈', 'x₉', 'x₁₀', 'x₁₁', 'x₁₂', 'x₁₃', 'x₁₄', 'x₁₅'];
+
+      for (let i = 0; i < n; i++) {
+        html += '<div class="slau-row">';
+        for (let j = 0; j < n; j++) {
+          if (j > 0) html += `<span>+</span>`;
+          html += `<input type="number" id="slau_${i}_${j}" step="any" value="0">`;
+          html += `<span>${varNames[j]}</span>`;
+        }
+        html += `<span>=</span>`;
+        html += `<input type="number" id="slau_b_${i}" step="any" value="0">`;
+        html += '</div>';
+      }
+      html += '</div>';
+      div.innerHTML = html;
+    }
+
+    function clearSlau() {
+      document.querySelectorAll('#slau-inputs input').forEach(el => el.value = '0');
+      document.getElementById('slau-result').innerHTML = '';
+    }
+
+    /** Считывание коэффициентов СЛАУ */
+    function readSlau() {
+      const n = parseInt(document.getElementById('slau-n').value);
+      const A = [], b = [];
+      for (let i = 0; i < n; i++) {
+        A.push([]);
+        for (let j = 0; j < n; j++) {
+          const val = parseFloat(document.getElementById(`slau_${i}_${j}`).value);
+          if (isNaN(val)) throw new Error(`Некорректный коэффициент a${i+1}${j+1}`);
+          A[i].push(val);
+        }
+        const bv = parseFloat(document.getElementById(`slau_b_${i}`).value);
+        if (isNaN(bv)) throw new Error(`Некорректное значение b${i+1}`);
+        b.push(bv);
+      }
+      return { A, b, n };
+    }
+
+    /** Решение СЛАУ выбранным методом */
+    function solveSlau(method) {
+      const resultDiv = document.getElementById('slau-result');
+      resultDiv.innerHTML = '';
+      try {
+        const { A, b, n } = readSlau();
+        let html = '';
+
+        switch (method) {
+          case 'gauss':
+            html = solveGauss(A, b, n);
+            break;
+          case 'cramer':
+            html = solveCramer(A, b, n);
+            break;
+          case 'matrix':
+            html = solveMatrixMethod(A, b, n);
+            break;
+        }
+
+        resultDiv.innerHTML = html;
+      } catch (e) {
+        resultDiv.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
+      }
+    }
+
+    // --- Метод Гаусса ---
+    function solveGauss(A, b, n) {
+      // Расширенная матрица
+      const aug = [];
+      for (let i = 0; i < n; i++) {
+        aug.push([...A[i], b[i]]);
+      }
+
+      let steps = '';
+      steps += `<div class="step"><strong>Расширенная матрица [A | b]:</strong><br>${stepAugMatrixHTML(aug, n)}</div>`;
+
+      let stepNum = 0;
+      const varNames = ['x₁', 'x₂', 'x₃', 'x₄', 'x₅', 'x₆', 'x₇', 'x₈', 'x₉', 'x₁₀', 'x₁₁', 'x₁₂', 'x₁₃', 'x₁₄', 'x₁₅'];
+
+      // Прямой ход
+      steps += `<div class="step"><strong>═══ ПРЯМОЙ ХОД ═══</strong></div>`;
+      for (let col = 0; col < n; col++) {
+        // Частичный выбор ведущего элемента
+        let maxRow = col;
+        for (let i = col + 1; i < n; i++) {
+          if (Math.abs(aug[i][col]) > Math.abs(aug[maxRow][col])) maxRow = i;
+        }
+        if (Math.abs(aug[maxRow][col]) < 1e-12) {
+          throw new Error('Система не имеет единственного решения (матрица вырожденная)');
+        }
+        if (maxRow !== col) {
+          [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+          stepNum++;
+          steps += `<div class="step"><strong>Шаг ${stepNum}:</strong> Меняем строки ${col+1} и ${maxRow+1}<br>${stepAugMatrixHTML(aug, n)}</div>`;
+        }
+
+        // Обнуляем элементы ниже ведущего
+        for (let i = col + 1; i < n; i++) {
+          if (Math.abs(aug[i][col]) > 1e-12) {
+            const factor = aug[i][col] / aug[col][col];
+            for (let j = col; j <= n; j++) {
+              aug[i][j] -= factor * aug[col][j];
+            }
+            stepNum++;
+            steps += `<div class="step"><strong>Шаг ${stepNum}:</strong> R<sub>${i+1}</sub> = R<sub>${i+1}</sub> − (${fmt(factor)})·R<sub>${col+1}</sub><br>${stepAugMatrixHTML(aug, n)}</div>`;
+          }
+        }
+      }
+
+      // Обратный ход
+      steps += `<div class="step"><strong>═══ ОБРАТНЫЙ ХОД ═══</strong></div>`;
+      const x = new Array(n).fill(0);
+      for (let i = n - 1; i >= 0; i--) {
+        let sum = aug[i][n];
+        let expr = fmt(aug[i][n]);
+        for (let j = i + 1; j < n; j++) {
+          sum -= aug[i][j] * x[j];
+          expr += ` − (${fmt(aug[i][j])})·(${fmt(x[j])})`;
+        }
+        x[i] = sum / aug[i][i];
+        stepNum++;
+        steps += `<div class="step"><strong>Шаг ${stepNum}:</strong> ${varNames[i]} = (${expr}) / ${fmt(aug[i][i])} = <strong>${fmt(x[i])}</strong></div>`;
+      }
+
+      // Результат
+      let resultHTML = `<div class="card"><div class="result-title">✅ Решение СЛАУ (Метод Гаусса)</div>`;
+      for (let i = 0; i < n; i++) {
+        resultHTML += `<div class="result-scalar" style="font-size:1.1rem;">${varNames[i]} = ${fmt(x[i])}</div>`;
+      }
+      resultHTML += stepsWrapHTML('Промежуточные шаги (Метод Гаусса)', steps);
+      resultHTML += '</div>';
+      return resultHTML;
+    }
+
+    // --- Метод Крамера ---
+    function solveCramer(A, b, n) {
+      let steps = '';
+      const varNames = ['x₁', 'x₂', 'x₃', 'x₄', 'x₅', 'x₆', 'x₇', 'x₈', 'x₉', 'x₁₀', 'x₁₁', 'x₁₂', 'x₁₃', 'x₁₄', 'x₁₅'];
+
+      // Главный определитель
+      let detSteps = [];
+      const D = determinant(A, detSteps);
+      steps += `<div class="step"><strong>Главный определитель D:</strong></div>`;
+      steps += detSteps.join('');
+      steps += `<div class="step"><strong>D = ${fmt(D)}</strong></div>`;
+
+      if (Math.abs(D) < 1e-12) {
+        throw new Error('Определитель D = 0. Метод Крамера неприменим — система несовместна или имеет бесконечно много решений');
+      }
+
+      // Определители D_i
+      const x = [];
+      for (let j = 0; j < n; j++) {
+        const Aj = copyMatrix(A);
+        for (let i = 0; i < n; i++) Aj[i][j] = b[i];
+
+        let djSteps = [];
+        const Dj = determinant(Aj, djSteps);
+        steps += `<div class="step"><strong>D<sub>${j+1}</sub> (заменяем столбец ${j+1} на вектор b):</strong></div>`;
+        steps += djSteps.join('');
+        steps += `<div class="step"><strong>D<sub>${j+1}</sub> = ${fmt(Dj)}</strong></div>`;
+
+        x.push(Dj / D);
+        steps += `<div class="step">${varNames[j]} = D<sub>${j+1}</sub> / D = ${fmt(Dj)} / ${fmt(D)} = <strong>${fmt(x[j])}</strong></div>`;
+      }
+
+      let resultHTML = `<div class="card"><div class="result-title">✅ Решение СЛАУ (Метод Крамера)</div>`;
+      for (let i = 0; i < n; i++) {
+        resultHTML += `<div class="result-scalar" style="font-size:1.1rem;">${varNames[i]} = ${fmt(x[i])}</div>`;
+      }
+      resultHTML += stepsWrapHTML('Промежуточные шаги (Метод Крамера)', steps);
+      resultHTML += '</div>';
+      return resultHTML;
+    }
+
+    // --- Матричный метод ---
+    function solveMatrixMethod(A, b, n) {
+      let steps = '';
+      const varNames = ['x₁', 'x₂', 'x₃', 'x₄', 'x₅', 'x₆', 'x₇', 'x₈', 'x₉', 'x₁₀', 'x₁₁', 'x₁₂', 'x₁₃', 'x₁₄', 'x₁₅'];
+
+      // 1. Находим определитель
+      let detSteps = [];
+      const D = determinant(A, detSteps);
+      steps += `<div class="step"><strong>1. Определитель матрицы A:</strong></div>`;
+      steps += detSteps.join('');
+      steps += `<div class="step"><strong>det(A) = ${fmt(D)}</strong></div>`;
+
+      if (Math.abs(D) < 1e-12) {
+        throw new Error('det(A) = 0. Матричный метод неприменим — обратная матрица не существует');
+      }
+
+      // 2. Находим обратную матрицу
+      let invSteps = [];
+      steps += `<div class="step"><strong>2. Находим обратную матрицу A⁻¹:</strong></div>`;
+      const Ainv = inverseMatrix(A, invSteps);
+      steps += invSteps.join('');
+      steps += `<div class="step"><strong>A⁻¹ =</strong><br>${stepMatrixHTML(Ainv)}</div>`;
+
+      // 3. x = A⁻¹ × b
+      steps += `<div class="step"><strong>3. X = A⁻¹ · b:</strong></div>`;
+      const x = [];
+      for (let i = 0; i < n; i++) {
+        let sum = 0;
+        let terms = [];
+        for (let j = 0; j < n; j++) {
+          sum += Ainv[i][j] * b[j];
+          terms.push(`${fmt(Ainv[i][j])}·${fmt(b[j])}`);
+        }
+        x.push(sum);
+        steps += `<div class="step">${varNames[i]} = ${terms.join(' + ')} = <strong>${fmt(sum)}</strong></div>`;
+      }
+
+      let resultHTML = `<div class="card"><div class="result-title">✅ Решение СЛАУ (Матричный метод)</div>`;
+      for (let i = 0; i < n; i++) {
+        resultHTML += `<div class="result-scalar" style="font-size:1.1rem;">${varNames[i]} = ${fmt(x[i])}</div>`;
+      }
+      resultHTML += stepsWrapHTML('Промежуточные шаги (Матричный метод)', steps);
+      resultHTML += '</div>';
+      return resultHTML;
+    }
+
+
+    // ==========================================
+    // ВКЛАДКА: ВЕКТОРЫ
+    // ==========================================
+
+    let vecOp = 'add';
+
+    function setVecOp(op) {
+      vecOp = op;
+      buildVecInputs();
+    }
+
+    function buildVecInputs() {
+      const sizesDiv = document.getElementById('vec-sizes');
+      const inputsDiv = document.getElementById('vec-inputs');
+      document.getElementById('vec-result').innerHTML = '';
+
+      let sizesHTML = '';
+      let inputsHTML = '';
+
+      // Векторное и смешанное — только 3D
+      if (vecOp === 'cross' || vecOp === 'mixed') {
+        sizesHTML = `<label>Размерность: 3 (фиксирована для ${vecOp === 'cross' ? 'векторного' : 'смешанного'} произведения)</label>`;
+        const dim = 3;
+        inputsHTML += vectorInputHTML('a', dim, 'Вектор a⃗');
+        inputsHTML += vectorInputHTML('b', dim, 'Вектор b⃗');
+        if (vecOp === 'mixed') {
+          inputsHTML += vectorInputHTML('c', dim, 'Вектор c⃗');
+        }
+      } else if (vecOp === 'mulNum') {
+        sizesHTML = `<label>Размерность:</label>
+          <select id="vec-dim" onchange="buildVecInputs()">
+            ${sizeOptions(3)}</select>
+          <span class="sep">·</span>
+          <label>k =</label>
+          <input type="number" id="vec-scalar" value="2" style="width:70px;">`;
+        const dim = parseInt(document.getElementById('vec-dim')?.value || 3);
+        inputsHTML += vectorInputHTML('a', dim, 'Вектор a⃗');
+      } else {
+        sizesHTML = `<label>Размерность:</label>
+          <select id="vec-dim" onchange="buildVecInputs()">
+            ${sizeOptions(3)}</select>`;
+        const dim = parseInt(document.getElementById('vec-dim')?.value || 3);
+        inputsHTML += vectorInputHTML('a', dim, 'Вектор a⃗');
+        if (['add', 'sub', 'dot'].includes(vecOp)) {
+          inputsHTML += vectorInputHTML('b', dim, 'Вектор b⃗');
+        }
+      }
+
+      sizesDiv.innerHTML = sizesHTML;
+      inputsDiv.innerHTML = inputsHTML;
+    }
+
+    function vectorInputHTML(prefix, dim, label) {
+      let html = `<div style="margin:0.5rem 0;"><label style="font-size:0.85rem;color:rgba(255,255,255,0.5);font-weight:600;">${label}</label>`;
+      html += `<div class="vector-inputs"><span class="vector-bracket">(</span>`;
+      for (let i = 0; i < dim; i++) {
+        if (i > 0) html += `<span style="color:rgba(255,255,255,0.2);">,</span>`;
+        html += `<input type="number" id="vec_${prefix}_${i}" step="any" value="0">`;
+      }
+      html += `<span class="vector-bracket">)</span></div></div>`;
+      return html;
+    }
+
+    function readVector(prefix, dim) {
+      const v = [];
+      for (let i = 0; i < dim; i++) {
+        const val = parseFloat(document.getElementById(`vec_${prefix}_${i}`).value);
+        if (isNaN(val)) throw new Error(`Некорректное значение в компоненте ${i+1} вектора ${prefix}`);
+        v.push(val);
+      }
+      return v;
+    }
+
+    function clearVecInputs() {
+      document.querySelectorAll('#vec-inputs input').forEach(el => el.value = '0');
+      document.getElementById('vec-result').innerHTML = '';
+    }
+
+    function vecToStr(v) {
+      return `(${v.map(x => fmt(x)).join(', ')})`;
+    }
+
+    function calcVector() {
+      const resultDiv = document.getElementById('vec-result');
+      resultDiv.innerHTML = '';
+      try {
+        let dim;
+        if (vecOp === 'cross' || vecOp === 'mixed') {
+          dim = 3;
+        } else {
+          dim = parseInt(document.getElementById('vec-dim')?.value || 3);
+        }
+
+        const a = readVector('a', dim);
+        let html = '';
+
+        switch (vecOp) {
+          case 'add':
+          case 'sub': {
+            const b = readVector('b', dim);
+            const sign = vecOp === 'add' ? 1 : -1;
+            const opSign = vecOp === 'add' ? '+' : '−';
+            const result = [];
+            let steps = '';
+            for (let i = 0; i < dim; i++) {
+              result.push(a[i] + sign * b[i]);
+              steps += `c<sub>${i+1}</sub> = ${fmt(a[i])} ${opSign} ${fmt(b[i])} = ${fmt(result[i])}<br>`;
+            }
+            html += `<div class="card"><div class="result-title">✅ Результат: a⃗ ${opSign} b⃗</div>`;
+            html += `<div class="result-scalar" style="font-size:1.1rem;">${vecToStr(result)}</div>`;
+            html += stepsWrapHTML('Промежуточные шаги', `<div class="step">${steps}</div>`);
+            html += '</div>';
+            break;
+          }
+
+          case 'mulNum': {
+            const k = parseFloat(document.getElementById('vec-scalar').value);
+            if (isNaN(k)) throw new Error('Введите корректное число k');
+            const result = [];
+            let steps = '';
+            for (let i = 0; i < dim; i++) {
+              result.push(a[i] * k);
+              steps += `c<sub>${i+1}</sub> = ${fmt(k)} × ${fmt(a[i])} = ${fmt(result[i])}<br>`;
+            }
+            html += `<div class="card"><div class="result-title">✅ Результат: ${fmt(k)} × a⃗</div>`;
+            html += `<div class="result-scalar" style="font-size:1.1rem;">${vecToStr(result)}</div>`;
+            html += stepsWrapHTML('Промежуточные шаги', `<div class="step">${steps}</div>`);
+            html += '</div>';
+            break;
+          }
+
+          case 'dot': {
+            const b = readVector('b', dim);
+            let sum = 0;
+            let terms = [];
+            let steps = '';
+            for (let i = 0; i < dim; i++) {
+              sum += a[i] * b[i];
+              terms.push(`${fmt(a[i])}·${fmt(b[i])}`);
+            }
+            steps += `a⃗ · b⃗ = ${terms.join(' + ')} = ${fmt(sum)}`;
+            html += `<div class="card"><div class="result-title">✅ Скалярное произведение: a⃗ · b⃗</div>`;
+            html += `<div class="result-scalar">${fmt(sum)}</div>`;
+            html += stepsWrapHTML('Промежуточные шаги', `<div class="step">${steps}</div>`);
+            html += '</div>';
+            break;
+          }
+
+          case 'cross': {
+            const b = readVector('b', 3);
+            const r = [
+              a[1]*b[2] - a[2]*b[1],
+              a[2]*b[0] - a[0]*b[2],
+              a[0]*b[1] - a[1]*b[0]
+            ];
+            let steps = '';
+            steps += `<strong>Формула:</strong> [a⃗ × b⃗] = (a₂b₃ − a₃b₂, a₃b₁ − a₁b₃, a₁b₂ − a₂b₁)<br><br>`;
+            steps += `i: ${fmt(a[1])}·${fmt(b[2])} − ${fmt(a[2])}·${fmt(b[1])} = ${fmt(r[0])}<br>`;
+            steps += `j: ${fmt(a[2])}·${fmt(b[0])} − ${fmt(a[0])}·${fmt(b[2])} = ${fmt(r[1])}<br>`;
+            steps += `k: ${fmt(a[0])}·${fmt(b[1])} − ${fmt(a[1])}·${fmt(b[0])} = ${fmt(r[2])}`;
+            html += `<div class="card"><div class="result-title">✅ Векторное произведение: [a⃗ × b⃗]</div>`;
+            html += `<div class="result-scalar" style="font-size:1.1rem;">${vecToStr(r)}</div>`;
+            html += stepsWrapHTML('Промежуточные шаги', `<div class="step">${steps}</div>`);
+            html += '</div>';
+            break;
+          }
+
+          case 'mixed': {
+            const b = readVector('b', 3);
+            const c = readVector('c', 3);
+            // Смешанное произведение = det([a, b, c])
+            const m = [a, b, c];
+            let detSteps = [];
+            const d = determinant(m, detSteps);
+            let steps = '';
+            steps += `<div class="step"><strong>Формула:</strong> (a⃗, b⃗, c⃗) = det | a⃗ |<br>`;
+            steps += `Строим матрицу из координат векторов:</div>`;
+            steps += `<div class="step">${stepMatrixHTML(m)}</div>`;
+            steps += detSteps.join('');
+            html += `<div class="card"><div class="result-title">✅ Смешанное произведение: (a⃗, b⃗, c⃗)</div>`;
+            html += `<div class="result-scalar">${fmt(d)}</div>`;
+            if (Math.abs(d) < 1e-12) {
+              html += `<div class="info-msg">Смешанное произведение равно 0 — векторы компланарны</div>`;
+            }
+            html += stepsWrapHTML('Промежуточные шаги', steps);
+            html += '</div>';
+            break;
+          }
+        }
+
+        resultDiv.innerHTML = html;
+      } catch (e) {
+        resultDiv.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
+      }
+    }
+
+
+    // ==========================================
+    // ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      buildMatInputs();
+      buildSlau();
+      buildVecInputs();
+    });
+  </script>
+</body>
+</html>

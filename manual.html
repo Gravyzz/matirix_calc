@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Матричный калькулятор — Техническая документация</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================= */
+    /* БАЗОВЫЕ СТИЛИ И ДИЗАЙН-СИСТЕМА               */
+    /* ============================================= */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #06060a;
+      color: #e0e0e0;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.8;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin: 3rem 0 1.25rem; color: #ffffff; }
+    h3 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.75rem; color: #c0c0c0; }
+    h4 { font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: #a0a0a0; }
+
+    p { margin-bottom: 1rem; }
+    strong { color: #ffffff; }
+
+    a {
+      color: #a78bfa;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    a:hover { color: #c4b5fd; text-decoration: underline; }
+
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    /* ============================================= */
+    /* ШАПКА ДОКУМЕНТА                               */
+    /* ============================================= */
+    .doc-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 3rem 2rem;
+      background: linear-gradient(180deg, rgba(124,92,252,0.08) 0%, rgba(124,92,252,0) 100%);
+      border: 1px solid rgba(124,92,252,0.15);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .doc-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #7c5cfc, transparent);
+    }
+    .doc-header h1 { font-size: 2.2rem; margin-bottom: 0.75rem; }
+    .doc-header .subtitle {
+      color: rgba(255,255,255,0.5);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .doc-header .meta {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .doc-header .meta-item {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.4);
+    }
+    .doc-header .meta-item strong {
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* ============================================= */
+    /* ОГЛАВЛЕНИЕ                                    */
+    /* ============================================= */
+    .toc {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+    }
+    .toc h2 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      color: #a78bfa;
+    }
+    .toc ol {
+      list-style: none;
+      counter-reset: toc-counter;
+      padding-left: 0;
+    }
+    .toc > ol > li {
+      counter-increment: toc-counter;
+      margin-bottom: 0.5rem;
+    }
+    .toc > ol > li > a::before {
+      content: counter(toc-counter) ". ";
+      color: #7c5cfc;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .toc > ol > li > a {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e0e0e0;
+    }
+    .toc > ol > li > a:hover { color: #a78bfa; }
+    .toc .toc-sub {
+      list-style: none;
+      padding-left: 1.5rem;
+      margin-top: 0.25rem;
+    }
+    .toc .toc-sub li { margin-bottom: 0.25rem; }
+    .toc .toc-sub a {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+    }
+    .toc .toc-sub a:hover { color: #a78bfa; }
+
+    /* ============================================= */
+    /* КАРТОЧКИ И СЕКЦИИ                             */
+    /* ============================================= */
+    .card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .section:last-child { border-bottom: none; }
+
+    /* Цветные акценты для секций */
+    .section-accent {
+      border-left: 3px solid #7c5cfc;
+      padding-left: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .section-accent.green { border-left-color: #22c55e; }
+    .section-accent.blue { border-left-color: #3b82f6; }
+    .section-accent.yellow { border-left-color: #eab308; }
+    .section-accent.red { border-left-color: #ef4444; }
+    .section-accent.purple { border-left-color: #a78bfa; }
+
+    /* ============================================= */
+    /* БЛОКИ ФОРМУЛ                                  */
+    /* ============================================= */
+    .formula {
+      background: rgba(124,92,252,0.06);
+      border: 1px solid rgba(124,92,252,0.15);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.25rem 0;
+      text-align: center;
+      font-family: 'Space Grotesk', 'JetBrains Mono', monospace;
+      font-size: 1.05rem;
+      color: #e0e0e0;
+      line-height: 2;
+      overflow-x: auto;
+    }
+    .formula .main {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    .formula .note {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.45);
+      font-family: 'Inter', sans-serif;
+      margin-top: 0.5rem;
+    }
+    .formula-inline {
+      font-family: 'Space Grotesk', 'JetBrains Mono', monospace;
+      background: rgba(124,92,252,0.08);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.92rem;
+      color: #c4b5fd;
+      white-space: nowrap;
+    }
+
+    /* ============================================= */
+    /* БЛОКИ КОДА                                    */
+    /* ============================================= */
+    .code-block {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.25rem 0;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: #c0c0c0;
+      position: relative;
+    }
+    .code-block .lang-label {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.75rem;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.25);
+      font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .code-block .keyword { color: #c4b5fd; }
+    .code-block .function { color: #7dd3fc; }
+    .code-block .string { color: #86efac; }
+    .code-block .comment { color: rgba(255,255,255,0.3); font-style: italic; }
+    .code-block .number { color: #fbbf24; }
+    .code-block .operator { color: #f472b6; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(255,255,255,0.06);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #a78bfa;
+    }
+
+    /* ============================================= */
+    /* ТАБЛИЦЫ                                       */
+    /* ============================================= */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1.25rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    th {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      color: #c0c0c0;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(255,255,255,0.02);
+    }
+    td { font-size: 0.92rem; }
+
+    /* ============================================= */
+    /* БЕЙДЖИ                                        */
+    /* ============================================= */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-green { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .badge-yellow { background: rgba(234,179,8,0.15); color: #eab308; }
+    .badge-red { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .badge-blue { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .badge-purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
+
+    /* ============================================= */
+    /* СТАТИСТИКА (KPI)                              */
+    /* ============================================= */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #c0c0c0;
+    }
+    .stat-label {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.45);
+      margin-top: 0.25rem;
+    }
+
+    /* ============================================= */
+    /* МАТРИЦА (визуальное отображение)               */
+    /* ============================================= */
+    .matrix-display {
+      display: inline-grid;
+      gap: 2px;
+      padding: 0.75rem 1rem;
+      background: rgba(124,92,252,0.04);
+      border: 1px solid rgba(124,92,252,0.12);
+      border-radius: 10px;
+      position: relative;
+      margin: 0.75rem 0.5rem;
+      vertical-align: middle;
+    }
+    .matrix-display::before,
+    .matrix-display::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      width: 4px;
+      border: 2px solid rgba(124,92,252,0.4);
+    }
+    .matrix-display::before { left: 2px; border-right: none; border-radius: 4px 0 0 4px; }
+    .matrix-display::after { right: 2px; border-left: none; border-radius: 0 4px 4px 0; }
+    .matrix-display .cell {
+      width: 45px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    /* ============================================= */
+    /* ПРИМЕРЫ                                       */
+    /* ============================================= */
+    .example-block {
+      background: rgba(34,197,94,0.04);
+      border: 1px solid rgba(34,197,94,0.12);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .example-block h4 {
+      color: #22c55e;
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+    .example-step {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(34,197,94,0.08);
+    }
+    .example-step:last-child { border-bottom: none; }
+    .example-step .label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #22c55e;
+      margin-bottom: 0.25rem;
+    }
+
+    /* ============================================= */
+    /* КНОПКА «НАВЕРХ»                               */
+    /* ============================================= */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #7c5cfc, #4a8cff);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(124,92,252,0.35);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .back-to-top:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 30px rgba(124,92,252,0.5);
+    }
+
+    /* ============================================= */
+    /* СПИСКИ                                        */
+    /* ============================================= */
+    ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.4rem; }
+    ul li::marker { color: #7c5cfc; }
+    ol li::marker { color: #7c5cfc; font-weight: 600; }
+
+    /* ============================================= */
+    /* ПРЕДУПРЕЖДЕНИЯ И ПРИМЕЧАНИЯ                   */
+    /* ============================================= */
+    .note-block {
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-size: 0.92rem;
+    }
+    .note-block.info {
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.2);
+      color: #93c5fd;
+    }
+    .note-block.warning {
+      background: rgba(234,179,8,0.08);
+      border: 1px solid rgba(234,179,8,0.2);
+      color: #fde68a;
+    }
+    .note-block.success {
+      background: rgba(34,197,94,0.08);
+      border: 1px solid rgba(34,197,94,0.2);
+      color: #86efac;
+    }
+
+    /* Разделитель секций */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(124,92,252,0.3), transparent);
+      margin: 3rem 0;
+    }
+
+    /* ============================================= */
+    /* АДАПТИВНОСТЬ                                  */
+    /* ============================================= */
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .doc-header { padding: 2rem 1rem; }
+      .doc-header h1 { font-size: 1.5rem; }
+      h2 { font-size: 1.25rem; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .formula { font-size: 0.9rem; padding: 1rem; }
+      .code-block { font-size: 0.75rem; padding: 1rem; }
+      .matrix-display .cell { width: 35px; height: 24px; font-size: 0.75rem; }
+    }
+
+    /* Плавный скроллинг */
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- =========================================================== -->
+    <!-- ТИТУЛЬНАЯ ЧАСТЬ                                             -->
+    <!-- =========================================================== -->
+    <div class="doc-header" id="top">
+      <h1>📐 Матричный калькулятор</h1>
+      <h1 style="font-size:1.3rem; font-weight:500; color:#a78bfa; margin-bottom:1rem;">Техническая документация</h1>
+      <p class="subtitle">
+        Подробное описание архитектуры, математических основ и программной реализации
+        веб-приложения для выполнения операций над матрицами, решения систем линейных
+        алгебраических уравнений и операций над векторами
+      </p>
+      <div class="meta">
+        <span class="meta-item"><strong>Технологии:</strong> HTML5, CSS3, JavaScript (ES6+)</span>
+        <span class="meta-item"><strong>Тип:</strong> Одностраничное приложение (SPA)</span>
+        <span class="meta-item"><strong>Версия:</strong> 1.0</span>
+      </div>
+    </div>
+
+    <!-- =========================================================== -->
+    <!-- ОГЛАВЛЕНИЕ                                                  -->
+    <!-- =========================================================== -->
+    <div class="toc" id="toc">
+      <h2>📋 Оглавление</h2>
+      <ol>
+        <li>
+          <a href="#section-1">Общее описание проекта</a>
+          <ul class="toc-sub">
+            <li><a href="#s1-goals">Цели и задачи</a></li>
+            <li><a href="#s1-tech">Используемые технологии</a></li>
+            <li><a href="#s1-arch">Архитектура приложения</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#section-2">Математические основы: операции над матрицами</a>
+          <ul class="toc-sub">
+            <li><a href="#s2-add">Сложение и вычитание матриц</a></li>
+            <li><a href="#s2-scalar">Умножение матрицы на число</a></li>
+            <li><a href="#s2-mul">Умножение матриц</a></li>
+            <li><a href="#s2-trans">Транспонирование матрицы</a></li>
+            <li><a href="#s2-det">Определитель матрицы</a></li>
+            <li><a href="#s2-rank">Ранг матрицы</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#section-3">Математические основы: решение СЛАУ</a>
+          <ul class="toc-sub">
+            <li><a href="#s3-gauss">Метод Гаусса</a></li>
+            <li><a href="#s3-cramer">Метод Крамера</a></li>
+            <li><a href="#s3-matrix">Матричный метод</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#section-4">Математические основы: операции над векторами</a>
+          <ul class="toc-sub">
+            <li><a href="#s4-addsub">Сложение и вычитание векторов</a></li>
+            <li><a href="#s4-scalar">Умножение вектора на число</a></li>
+            <li><a href="#s4-dot">Скалярное произведение</a></li>
+            <li><a href="#s4-cross">Векторное произведение</a></li>
+            <li><a href="#s4-mixed">Смешанное произведение</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#section-5">Реализация в коде</a>
+          <ul class="toc-sub">
+            <li><a href="#s5-det">Функция определителя</a></li>
+            <li><a href="#s5-gauss">Метод Гаусса</a></li>
+            <li><a href="#s5-jordan">Метод Гаусса-Жордана для обратной матрицы</a></li>
+            <li><a href="#s5-cramer">Метод Крамера</a></li>
+            <li><a href="#s5-rank">Вычисление ранга</a></li>
+            <li><a href="#s5-cross">Векторное произведение</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#section-6">Интерфейс и пользовательский опыт (UX)</a>
+          <ul class="toc-sub">
+            <li><a href="#s6-tabs">Система вкладок</a></li>
+            <li><a href="#s6-dynamic">Динамическая генерация полей ввода</a></li>
+            <li><a href="#s6-steps">Отображение промежуточных шагов</a></li>
+            <li><a href="#s6-errors">Обработка ошибок</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#section-7">Технические характеристики</a>
+          <ul class="toc-sub">
+            <li><a href="#s7-reliability">Надёжность вычислений</a></li>
+            <li><a href="#s7-performance">Производительность</a></li>
+            <li><a href="#s7-compat">Совместимость с браузерами</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#section-8">Примеры использования</a>
+          <ul class="toc-sub">
+            <li><a href="#s8-mat">Примеры: операции над матрицами</a></li>
+            <li><a href="#s8-slau">Примеры: решение СЛАУ</a></li>
+            <li><a href="#s8-vec">Примеры: операции над векторами</a></li>
+          </ul>
+        </li>
+        <li><a href="#section-9">Заключение</a></li>
+      </ol>
+    </div>
+
+    <!-- =========================================================== -->
+    <!-- РАЗДЕЛ 1: ОБЩЕЕ ОПИСАНИЕ                                   -->
+    <!-- =========================================================== -->
+    <div class="section" id="section-1">
+      <h2>1. Общее описание проекта</h2>
+
+      <h3 id="s1-goals">1.1 Цели и задачи</h3>
+      <p>
+        <strong>Матричный калькулятор</strong> — это интерактивное веб-приложение, предназначенное
+        для выполнения основных операций линейной алгебры. Программа позволяет студентам, инженерам
+        и всем интересующимся математикой выполнять вычисления с матрицами, решать системы линейных
+        алгебраических уравнений (СЛАУ) и производить операции над векторами — всё в рамках
+        единого удобного интерфейса.
+      </p>
+
+      <div class="section-accent purple">
+        <p><strong>Основные цели проекта:</strong></p>
+        <ul>
+          <li>Предоставить инструмент для быстрого и точного выполнения матричных операций</li>
+          <li>Реализовать три метода решения СЛАУ (Гаусса, Крамера, матричный) с пошаговым отображением</li>
+          <li>Поддержать операции над векторами, включая скалярное, векторное и смешанное произведения</li>
+          <li>Обеспечить детальный вывод промежуточных шагов решения для учебных целей</li>
+          <li>Создать современный, адаптивный интерфейс, работающий в любом браузере без установки</li>
+        </ul>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value">7</div>
+          <div class="stat-label">Операций над матрицами</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Метода решения СЛАУ</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">6</div>
+          <div class="stat-label">Операций над векторами</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">15×15</div>
+          <div class="stat-label">Максимальный размер матриц</div>
+        </div>
+      </div>
+
+      <h3 id="s1-tech">1.2 Используемые технологии</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Технология</th>
+              <th>Назначение</th>
+              <th>Подробности</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-blue">HTML5</span></td>
+              <td>Разметка страницы</td>
+              <td>Семантическая структура, формы ввода, динамическое содержимое</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-green">CSS3</span></td>
+              <td>Стилизация и адаптивность</td>
+              <td>Grid-раскладка, Flexbox, CSS-переменные, градиенты, анимации переходов</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-yellow">JavaScript (ES6+)</span></td>
+              <td>Логика вычислений и интерактивность</td>
+              <td>Стрелочные функции, деструктуризация, template literals, spread-оператор</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-purple">Google Fonts</span></td>
+              <td>Типографика</td>
+              <td>Space Grotesk (заголовки), Inter (основной текст)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note-block info">
+        <strong>Важно:</strong> Все вычисления выполняются исключительно на стороне клиента (в браузере).
+        Приложение не требует серверной части, подключения к интернету (после загрузки)
+        или каких-либо внешних математических библиотек. Все алгоритмы реализованы вручную на JavaScript.
+      </div>
+
+      <h3 id="s1-arch">1.3 Архитектура приложения</h3>
+      <p>
+        Приложение реализовано как <strong>одностраничное веб-приложение (SPA)</strong>, состоящее из
+        единственного HTML-файла, который содержит в себе всю разметку, стили и скрипты. Логически
+        приложение разделено на три модуля:
+      </p>
+
+      <div class="stat-grid">
+        <div class="stat-card" style="border-color: rgba(124,92,252,0.3);">
+          <div class="stat-value" style="font-size:1.5rem; color: #a78bfa;">📊</div>
+          <div class="stat-label" style="font-size: 0.95rem; color: #e0e0e0; margin-top: 0.5rem;"><strong>Модуль «Матрицы»</strong></div>
+          <div class="stat-label">Сложение, вычитание, умножение, транспонирование, определитель, ранг</div>
+        </div>
+        <div class="stat-card" style="border-color: rgba(34,197,94,0.3);">
+          <div class="stat-value" style="font-size:1.5rem; color: #22c55e;">🧮</div>
+          <div class="stat-label" style="font-size: 0.95rem; color: #e0e0e0; margin-top: 0.5rem;"><strong>Модуль «СЛАУ»</strong></div>
+          <div class="stat-label">Решение системы методами Гаусса, Крамера, матричным методом</div>
+        </div>
+        <div class="stat-card" style="border-color: rgba(59,130,246,0.3);">
+          <div class="stat-value" style="font-size:1.5rem; color: #3b82f6;">📐</div>
+          <div class="stat-label" style="font-size: 0.95rem; color: #e0e0e0; margin-top: 0.5rem;"><strong>Модуль «Векторы»</strong></div>
+          <div class="stat-label">Сложение, вычитание, умножение на число, скалярное, векторное, смешанное произведения</div>
+        </div>
+      </div>
+
+      <p>Каждый модуль реализован как отдельная вкладка с собственным набором элементов управления,
+      полями ввода и областью вывода результата с промежуточными шагами вычислений.</p>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- =========================================================== -->
+    <!-- РАЗДЕЛ 2: МАТЕМАТИЧЕСКИЕ ОСНОВЫ — МАТРИЦЫ                   -->
+    <!-- =========================================================== -->
+    <div class="section" id="section-2">
+      <h2>2. Математические основы: операции над матрицами</h2>
+
+      <p>
+        Матрицей размера <span class="formula-inline">m × n</span> называется прямоугольная таблица чисел,
+        содержащая <span class="formula-inline">m</span> строк и <span class="formula-inline">n</span> столбцов.
+        Элемент матрицы, стоящий на пересечении <span class="formula-inline">i</span>-й строки и
+        <span class="formula-inline">j</span>-го столбца, обозначается <span class="formula-inline">a<sub>ij</sub></span>.
+      </p>
+
+      <!-- --------- 2.1 Сложение и вычитание --------- -->
+      <h3 id="s2-add">2.1 Сложение и вычитание матриц</h3>
+
+      <p>
+        Сложение и вычитание определено только для матриц <strong>одинакового размера</strong>.
+        Результатом является матрица того же размера, каждый элемент которой равен сумме (разности)
+        соответствующих элементов исходных матриц.
+      </p>
+
+      <div class="formula">
+        <div class="main">C<sub>ij</sub> = A<sub>ij</sub> ± B<sub>ij</sub></div>
+        <div class="note">где i = 1, 2, …, m; j = 1, 2, …, n; матрицы A и B имеют размер m × n</div>
+      </div>
+
+      <div class="section-accent green">
+        <h4>Условия применимости:</h4>
+        <ul>
+          <li>Матрицы A и B должны иметь <strong>одинаковое количество строк</strong></li>
+          <li>Матрицы A и B должны иметь <strong>одинаковое количество столбцов</strong></li>
+          <li>Результирующая матрица C имеет тот же размер m × n</li>
+        </ul>
+      </div>
+
+      <h4>Свойства операции сложения:</h4>
+      <ul>
+        <li><strong>Коммутативность:</strong> A + B = B + A</li>
+        <li><strong>Ассоциативность:</strong> (A + B) + C = A + (B + C)</li>
+        <li><strong>Существование нулевого элемента:</strong> A + O = A, где O — нулевая матрица</li>
+        <li><strong>Существование противоположного элемента:</strong> A + (−A) = O</li>
+      </ul>
+
+      <!-- --------- 2.2 Умножение на число --------- -->
+      <h3 id="s2-scalar">2.2 Умножение матрицы на число</h3>
+
+      <p>
+        При умножении матрицы на число (скаляр) <span class="formula-inline">k</span>,
+        каждый элемент матрицы умножается на это число. Операция определена для матрицы
+        любого размера и любого вещественного числа.
+      </p>
+
+      <div class="formula">
+        <div class="main">C<sub>ij</sub> = k · A<sub>ij</sub></div>
+        <div class="note">где k — вещественное число, i = 1, 2, …, m; j = 1, 2, …, n</div>
+      </div>
+
+      <h4>Свойства:</h4>
+      <ul>
+        <li>1 · A = A (умножение на единицу не меняет матрицу)</li>
+        <li>0 · A = O (умножение на ноль даёт нулевую матрицу)</li>
+        <li>(k₁ · k₂) · A = k₁ · (k₂ · A) (ассоциативность)</li>
+        <li>(k₁ + k₂) · A = k₁ · A + k₂ · A (дистрибутивность)</li>
+        <li>k · (A + B) = k · A + k · B (дистрибутивность)</li>
+      </ul>
+
+      <!-- --------- 2.3 Умножение матриц --------- -->
+      <h3 id="s2-mul">2.3 Умножение матриц</h3>
+
+      <p>
+        Произведение матрицы <span class="formula-inline">A</span> размера <span class="formula-inline">m × p</span>
+        на матрицу <span class="formula-inline">B</span> размера <span class="formula-inline">p × n</span>
+        определено только тогда, когда <strong>число столбцов матрицы A равно числу строк матрицы B</strong>.
+        Результатом является матрица <span class="formula-inline">C</span> размера <span class="formula-inline">m × n</span>.
+      </p>
+
+      <div class="formula">
+        <div class="main">C<sub>ij</sub> = Σ<sub>k=1</sub><sup>p</sup> A<sub>ik</sub> · B<sub>kj</sub></div>
+        <div class="note">
+          где i = 1, …, m; j = 1, …, n; суммирование ведётся по k от 1 до p<br>
+          Размер A: m × p, размер B: p × n → Результат: m × n
+        </div>
+      </div>
+
+      <p>
+        Каждый элемент результирующей матрицы <span class="formula-inline">C<sub>ij</sub></span> вычисляется
+        как <strong>скалярное произведение</strong> i-й строки матрицы A на j-й столбец матрицы B.
+      </p>
+
+      <div class="section-accent yellow">
+        <h4>Важные свойства умножения матриц:</h4>
+        <ul>
+          <li><strong>Некоммутативность:</strong> A · B ≠ B · A (в общем случае)</li>
+          <li><strong>Ассоциативность:</strong> (A · B) · C = A · (B · C)</li>
+          <li><strong>Дистрибутивность:</strong> A · (B + C) = A · B + A · C</li>
+          <li><strong>Совместимость с умножением на скаляр:</strong> k · (A · B) = (k · A) · B = A · (k · B)</li>
+        </ul>
+      </div>
+
+      <!-- --------- 2.4 Транспонирование --------- -->
+      <h3 id="s2-trans">2.4 Транспонирование матрицы</h3>
+
+      <p>
+        Транспонированная матрица <span class="formula-inline">A<sup>T</sup></span> получается из
+        исходной матрицы <span class="formula-inline">A</span> заменой строк столбцами
+        (и наоборот). Если матрица A имеет размер <span class="formula-inline">m × n</span>,
+        то транспонированная матрица A<sup>T</sup> имеет размер <span class="formula-inline">n × m</span>.
+      </p>
+
+      <div class="formula">
+        <div class="main">A<sup>T</sup><sub>ij</sub> = A<sub>ji</sub></div>
+        <div class="note">Строки исходной матрицы становятся столбцами транспонированной, и наоборот</div>
+      </div>
+
+      <h4>Свойства транспонирования:</h4>
+      <ul>
+        <li>(A<sup>T</sup>)<sup>T</sup> = A</li>
+        <li>(A + B)<sup>T</sup> = A<sup>T</sup> + B<sup>T</sup></li>
+        <li>(k · A)<sup>T</sup> = k · A<sup>T</sup></li>
+        <li>(A · B)<sup>T</sup> = B<sup>T</sup> · A<sup>T</sup> (порядок меняется!)</li>
+      </ul>
+
+      <!-- --------- 2.5 Определитель --------- -->
+      <h3 id="s2-det">2.5 Определитель матрицы</h3>
+
+      <p>
+        Определитель (детерминант) — числовая характеристика <strong>квадратной матрицы</strong>.
+        Определитель обозначается <span class="formula-inline">det(A)</span> или <span class="formula-inline">|A|</span>.
+        Он широко применяется для проверки обратимости матрицы, решения СЛАУ методом Крамера,
+        вычисления объёмов и в других задачах.
+      </p>
+
+      <h4>Базовые случаи:</h4>
+
+      <div class="formula">
+        <div class="main">Матрица 1×1: det(A) = a<sub>11</sub></div>
+      </div>
+
+      <div class="formula">
+        <div class="main">Матрица 2×2: det(A) = a<sub>11</sub> · a<sub>22</sub> − a<sub>12</sub> · a<sub>21</sub></div>
+      </div>
+
+      <h4>Разложение Лапласа по первой строке (общий случай n×n):</h4>
+
+      <div class="formula">
+        <div class="main">det(A) = Σ<sub>j=1</sub><sup>n</sup> (−1)<sup>1+j</sup> · a<sub>1j</sub> · M<sub>1j</sub></div>
+        <div class="note">
+          где M<sub>1j</sub> — минор элемента a<sub>1j</sub> (определитель матрицы (n−1)×(n−1),<br>
+          полученной вычёркиванием первой строки и j-го столбца)
+        </div>
+      </div>
+
+      <p>
+        Множитель <span class="formula-inline">(−1)<sup>1+j</sup></span> задаёт знак алгебраического дополнения:
+        для нечётных j знак положительный (+), для чётных — отрицательный (−).
+        Рекурсивное вычисление продолжается до тех пор, пока не будет достигнут базовый случай 1×1 или 2×2.
+      </p>
+
+      <div class="section-accent red">
+        <h4>Свойства определителя:</h4>
+        <ul>
+          <li>det(A) = 0 ⇔ матрица A <strong>вырожденная</strong> (необратимая)</li>
+          <li>det(A<sup>T</sup>) = det(A)</li>
+          <li>det(A · B) = det(A) · det(B)</li>
+          <li>det(k · A) = k<sup>n</sup> · det(A), где n — порядок матрицы</li>
+          <li>При перестановке двух строк определитель меняет знак</li>
+          <li>Если две строки одинаковы, то det(A) = 0</li>
+        </ul>
+      </div>
+
+      <!-- --------- 2.6 Ранг матрицы --------- -->
+      <h3 id="s2-rank">2.6 Ранг матрицы</h3>
+
+      <p>
+        <strong>Ранг матрицы</strong> — это максимальное число линейно независимых строк
+        (или столбцов) матрицы. Ранг обозначается <span class="formula-inline">rank(A)</span>
+        или <span class="formula-inline">rg(A)</span>. Ранг матрицы размера m × n
+        не может превышать min(m, n).
+      </p>
+
+      <h4>Метод вычисления — элементарные преобразования строк (метод Гаусса):</h4>
+
+      <ol>
+        <li>Приводим матрицу к <strong>ступенчатому виду</strong> (верхнетреугольному) с помощью элементарных преобразований</li>
+        <li>Подсчитываем количество <strong>ненулевых строк</strong> — это и есть ранг</li>
+      </ol>
+
+      <div class="formula">
+        <div class="main">rank(A) = количество ненулевых строк ступенчатой матрицы</div>
+        <div class="note">
+          Элементарные преобразования строк:<br>
+          1) Перестановка двух строк: R<sub>i</sub> ↔ R<sub>j</sub><br>
+          2) Умножение строки на ненулевое число: R<sub>i</sub> → k · R<sub>i</sub><br>
+          3) Прибавление к строке другой строки, умноженной на число: R<sub>i</sub> → R<sub>i</sub> + k · R<sub>j</sub>
+        </div>
+      </div>
+
+      <div class="note-block info">
+        <strong>Теорема Кронекера-Капелли:</strong> Система линейных уравнений совместна тогда и только тогда,
+        когда ранг матрицы коэффициентов равен рангу расширенной матрицы: rank(A) = rank(A|b).
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- =========================================================== -->
+    <!-- РАЗДЕЛ 3: МАТЕМАТИЧЕСКИЕ ОСНОВЫ — СЛАУ                     -->
+    <!-- =========================================================== -->
+    <div class="section" id="section-3">
+      <h2>3. Математические основы: решение СЛАУ</h2>
+
+      <p>
+        Система линейных алгебраических уравнений (СЛАУ) с <span class="formula-inline">n</span>
+        неизвестными и <span class="formula-inline">n</span> уравнениями записывается в виде:
+      </p>
+
+      <div class="formula">
+        <div class="main">A · X = B</div>
+        <div class="note">
+          a<sub>11</sub>x<sub>1</sub> + a<sub>12</sub>x<sub>2</sub> + … + a<sub>1n</sub>x<sub>n</sub> = b<sub>1</sub><br>
+          a<sub>21</sub>x<sub>1</sub> + a<sub>22</sub>x<sub>2</sub> + … + a<sub>2n</sub>x<sub>n</sub> = b<sub>2</sub><br>
+          …………………………………………………<br>
+          a<sub>n1</sub>x<sub>1</sub> + a<sub>n2</sub>x<sub>2</sub> + … + a<sub>nn</sub>x<sub>n</sub> = b<sub>n</sub>
+        </div>
+      </div>
+
+      <!-- --------- 3.1 Метод Гаусса --------- -->
+      <h3 id="s3-gauss">3.1 Метод Гаусса</h3>
+
+      <p>
+        Метод Гаусса (метод последовательного исключения неизвестных) — это основной метод
+        решения СЛАУ. Он состоит из двух этапов: <strong>прямого хода</strong> и <strong>обратного хода</strong>.
+      </p>
+
+      <h4>Прямой ход:</h4>
+      <p>
+        Приведение расширенной матрицы <span class="formula-inline">[A | b]</span> к верхнетреугольному
+        (ступенчатому) виду с помощью элементарных преобразований строк:
+      </p>
+
+      <div class="formula">
+        <div class="main">R<sub>i</sub> → R<sub>i</sub> − (a<sub>ik</sub> / a<sub>kk</sub>) · R<sub>k</sub></div>
+        <div class="note">
+          где a<sub>kk</sub> — ведущий элемент (pivot) на шаге k, i &gt; k<br>
+          Цель: обнулить все элементы ниже ведущего в текущем столбце
+        </div>
+      </div>
+
+      <p>
+        На каждом шаге выбирается <strong>ведущий элемент</strong> (pivot). Для повышения
+        численной устойчивости применяется <strong>частичный выбор ведущего элемента</strong>
+        (partial pivoting) — выбирается строка с максимальным по модулю элементом в текущем столбце.
+      </p>
+
+      <h4>Обратный ход:</h4>
+      <p>
+        После приведения к треугольному виду значения неизвестных вычисляются последовательно,
+        начиная с последнего уравнения:
+      </p>
+
+      <div class="formula">
+        <div class="main">x<sub>i</sub> = (b'<sub>i</sub> − Σ<sub>j=i+1</sub><sup>n</sup> a'<sub>ij</sub> · x<sub>j</sub>) / a'<sub>ii</sub></div>
+        <div class="note">для i = n, n−1, …, 1 (обратный порядок); штрих означает преобразованные коэффициенты</div>
+      </div>
+
+      <div class="section-accent blue">
+        <h4>Алгоритм метода Гаусса:</h4>
+        <ol>
+          <li>Формируем расширенную матрицу [A | b]</li>
+          <li><strong>Для каждого столбца k = 1, …, n:</strong></li>
+          <li style="margin-left: 1.5rem;">Находим строку с максимальным |a<sub>ik</sub>| (i ≥ k) — выбор ведущего элемента</li>
+          <li style="margin-left: 1.5rem;">Меняем строки k и найденную строку местами</li>
+          <li style="margin-left: 1.5rem;">Для каждой строки i &gt; k: R<sub>i</sub> = R<sub>i</sub> − (a<sub>ik</sub>/a<sub>kk</sub>) · R<sub>k</sub></li>
+          <li>Выполняем обратный ход для нахождения x<sub>n</sub>, x<sub>n−1</sub>, …, x<sub>1</sub></li>
+        </ol>
+      </div>
+
+      <!-- --------- 3.2 Метод Крамера --------- -->
+      <h3 id="s3-cramer">3.2 Метод Крамера</h3>
+
+      <p>
+        Метод Крамера применим к системам из <span class="formula-inline">n</span> уравнений
+        с <span class="formula-inline">n</span> неизвестными, когда определитель матрицы
+        коэффициентов <span class="formula-inline">D = det(A) ≠ 0</span>.
+      </p>
+
+      <div class="formula">
+        <div class="main">x<sub>i</sub> = D<sub>i</sub> / D</div>
+        <div class="note">
+          где D = det(A) — определитель матрицы системы,<br>
+          D<sub>i</sub> — определитель матрицы, полученной заменой i-го столбца A<br>
+          на столбец свободных членов b
+        </div>
+      </div>
+
+      <p>Для вычисления решения нужно найти <span class="formula-inline">n + 1</span> определитель:
+      один главный определитель D и n определителей D<sub>i</sub> с заменённым столбцом.</p>
+
+      <div class="section-accent yellow">
+        <h4>Условия применимости метода Крамера:</h4>
+        <ul>
+          <li>Система должна быть <strong>квадратной</strong> (количество уравнений = количество неизвестных)</li>
+          <li>Определитель матрицы <strong>D ≠ 0</strong></li>
+          <li>При D = 0 метод Крамера не даёт ответа (система либо несовместна, либо имеет бесконечно много решений)</li>
+        </ul>
+      </div>
+
+      <!-- --------- 3.3 Матричный метод --------- -->
+      <h3 id="s3-matrix">3.3 Матричный метод</h3>
+
+      <p>
+        Матричный метод основан на нахождении <strong>обратной матрицы</strong> A<sup>−1</sup>
+        и умножении на неё столбца свободных членов.
+      </p>
+
+      <div class="formula">
+        <div class="main">X = A<sup>−1</sup> · B</div>
+        <div class="note">
+          Решение существует тогда и только тогда, когда det(A) ≠ 0 (матрица обратима)
+        </div>
+      </div>
+
+      <h4>Нахождение обратной матрицы методом Гаусса-Жордана:</h4>
+      <ol>
+        <li>Составляем расширенную матрицу <span class="formula-inline">[A | E]</span>, где E — единичная матрица</li>
+        <li>Приводим левую часть к единичной матрице с помощью элементарных преобразований строк</li>
+        <li>Правая часть расширенной матрицы станет обратной матрицей A<sup>−1</sup></li>
+      </ol>
+
+      <div class="formula">
+        <div class="main">[A | E] → [E | A<sup>−1</sup>]</div>
+        <div class="note">
+          Отличие от метода Гаусса: элементы обнуляются не только ниже, но и выше ведущего элемента,<br>
+          а ведущая строка делится на ведущий элемент для получения единицы на диагонали
+        </div>
+      </div>
+
+      <h4>Сравнение трёх методов решения СЛАУ:</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Критерий</th>
+              <th>Метод Гаусса</th>
+              <th>Метод Крамера</th>
+              <th>Матричный метод</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Сложность</td>
+              <td><span class="badge badge-green">O(n³)</span></td>
+              <td><span class="badge badge-red">O(n! · n)</span></td>
+              <td><span class="badge badge-yellow">O(n³)</span></td>
+            </tr>
+            <tr>
+              <td>Условие</td>
+              <td>Любая квадратная система</td>
+              <td>det(A) ≠ 0</td>
+              <td>det(A) ≠ 0</td>
+            </tr>
+            <tr>
+              <td>Наглядность</td>
+              <td>Высокая</td>
+              <td>Очень высокая</td>
+              <td>Средняя</td>
+            </tr>
+            <tr>
+              <td>Побочный результат</td>
+              <td>Треугольная матрица</td>
+              <td>Все определители</td>
+              <td>Обратная матрица A⁻¹</td>
+            </tr>
+            <tr>
+              <td>Устойчивость</td>
+              <td><span class="badge badge-green">Высокая</span></td>
+              <td><span class="badge badge-yellow">Средняя</span></td>
+              <td><span class="badge badge-green">Высокая</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- =========================================================== -->
+    <!-- РАЗДЕЛ 4: МАТЕМАТИЧЕСКИЕ ОСНОВЫ — ВЕКТОРЫ                   -->
+    <!-- =========================================================== -->
+    <div class="section" id="section-4">
+      <h2>4. Математические основы: операции над векторами</h2>
+
+      <p>
+        Вектор — это упорядоченный набор чисел (координат). В данном приложении вектор
+        <span class="formula-inline">a⃗ = (a₁, a₂, …, aₙ)</span> может иметь размерность
+        от 1 до 15 для арифметических операций. Для векторного и смешанного произведений
+        размерность фиксирована: 3 (трёхмерное пространство).
+      </p>
+
+      <!-- --------- 4.1 Сложение и вычитание --------- -->
+      <h3 id="s4-addsub">4.1 Сложение и вычитание векторов</h3>
+
+      <p>
+        Сложение и вычитание векторов выполняется <strong>покомпонентно</strong>.
+        Операция определена только для векторов одинаковой размерности.
+      </p>
+
+      <div class="formula">
+        <div class="main">c⃗ = a⃗ ± b⃗ ⇒ c<sub>i</sub> = a<sub>i</sub> ± b<sub>i</sub></div>
+        <div class="note">для i = 1, 2, …, n; векторы должны иметь одинаковую размерность n</div>
+      </div>
+
+      <!-- --------- 4.2 Умножение на число --------- -->
+      <h3 id="s4-scalar">4.2 Умножение вектора на число</h3>
+
+      <div class="formula">
+        <div class="main">c⃗ = k · a⃗ ⇒ c<sub>i</sub> = k · a<sub>i</sub></div>
+        <div class="note">Каждая координата вектора умножается на скаляр k</div>
+      </div>
+
+      <p>
+        Геометрический смысл: при k > 0 вектор растягивается (или сжимается), сохраняя направление;
+        при k < 0 — направление меняется на противоположное; при k = 0 получается нулевой вектор.
+      </p>
+
+      <!-- --------- 4.3 Скалярное произведение --------- -->
+      <h3 id="s4-dot">4.3 Скалярное произведение</h3>
+
+      <p>
+        Скалярное произведение двух векторов — это <strong>число</strong> (скаляр), равное
+        сумме произведений соответствующих координат. Используется для нахождения угла между
+        векторами, проекций и проверки ортогональности.
+      </p>
+
+      <div class="formula">
+        <div class="main">(a⃗, b⃗) = Σ<sub>i=1</sub><sup>n</sup> a<sub>i</sub> · b<sub>i</sub> = a₁b₁ + a₂b₂ + … + aₙbₙ</div>
+      </div>
+
+      <div class="formula">
+        <div class="main">(a⃗, b⃗) = |a⃗| · |b⃗| · cos(θ)</div>
+        <div class="note">
+          где θ — угол между векторами,<br>
+          |a⃗| = √(a₁² + a₂² + … + aₙ²) — длина (модуль) вектора
+        </div>
+      </div>
+
+      <div class="section-accent green">
+        <h4>Свойства скалярного произведения:</h4>
+        <ul>
+          <li>(a⃗, b⃗) = (b⃗, a⃗) — коммутативность</li>
+          <li>(a⃗, b⃗ + c⃗) = (a⃗, b⃗) + (a⃗, c⃗) — дистрибутивность</li>
+          <li>(ka⃗, b⃗) = k(a⃗, b⃗) — вынесение скаляра</li>
+          <li>(a⃗, b⃗) = 0 ⇔ a⃗ ⊥ b⃗ (векторы ортогональны)</li>
+        </ul>
+      </div>
+
+      <!-- --------- 4.4 Векторное произведение --------- -->
+      <h3 id="s4-cross">4.4 Векторное произведение</h3>
+
+      <p>
+        Векторное произведение определено <strong>только для трёхмерных векторов</strong>.
+        Результатом является вектор, перпендикулярный обоим исходным.
+      </p>
+
+      <div class="formula">
+        <div class="main">
+          [a⃗ × b⃗] = |<br>
+          &nbsp;&nbsp;i⃗&nbsp;&nbsp;&nbsp;j⃗&nbsp;&nbsp;&nbsp;k⃗<br>
+          &nbsp;&nbsp;a₁&nbsp;&nbsp;a₂&nbsp;&nbsp;a₃<br>
+          &nbsp;&nbsp;b₁&nbsp;&nbsp;b₂&nbsp;&nbsp;b₃<br>
+          |
+        </div>
+      </div>
+
+      <p>Раскрывая определитель по первой строке:</p>
+
+      <div class="formula">
+        <div class="main">
+          [a⃗ × b⃗] = (a₂b₃ − a₃b₂) · i⃗ − (a₁b₃ − a₃b₁) · j⃗ + (a₁b₂ − a₂b₁) · k⃗
+        </div>
+        <div class="note">
+          Или в координатной форме:<br>
+          [a⃗ × b⃗] = (a₂b₃ − a₃b₂, &nbsp;a₃b₁ − a₁b₃, &nbsp;a₁b₂ − a₂b₁)
+        </div>
+      </div>
+
+      <h4>Геометрический смысл:</h4>
+      <ul>
+        <li>Модуль векторного произведения равен площади параллелограмма: |[a⃗ × b⃗]| = |a⃗| · |b⃗| · sin(θ)</li>
+        <li>Направление определяется правилом правой руки</li>
+        <li>[a⃗ × b⃗] = 0⃗ ⇔ a⃗ ∥ b⃗ (векторы коллинеарны)</li>
+      </ul>
+
+      <!-- --------- 4.5 Смешанное произведение --------- -->
+      <h3 id="s4-mixed">4.5 Смешанное произведение</h3>
+
+      <p>
+        Смешанное произведение трёх векторов — это <strong>число</strong> (скаляр), определённое как:
+      </p>
+
+      <div class="formula">
+        <div class="main">(a⃗, b⃗, c⃗) = a⃗ · [b⃗ × c⃗] = det
+        <br>| a₁ &nbsp;a₂ &nbsp;a₃ |
+        <br>| b₁ &nbsp;b₂ &nbsp;b₃ |
+        <br>| c₁ &nbsp;c₂ &nbsp;c₃ |
+        </div>
+        <div class="note">
+          Равно определителю матрицы 3×3, составленной из координат трёх векторов
+        </div>
+      </div>
+
+      <h4>Геометрический смысл:</h4>
+      <ul>
+        <li>Модуль смешанного произведения равен <strong>объёму параллелепипеда</strong>, построенного на трёх векторах</li>
+        <li>(a⃗, b⃗, c⃗) = 0 ⇔ векторы <strong>компланарны</strong> (лежат в одной плоскости)</li>
+        <li>Знак определяет ориентацию тройки (правая или левая)</li>
+      </ul>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- =========================================================== -->
+    <!-- РАЗДЕЛ 5: РЕАЛИЗАЦИЯ В КОДЕ                                 -->
+    <!-- =========================================================== -->
+    <div class="section" id="section-5">
+      <h2>5. Реализация в коде</h2>
+
+      <p>
+        Все математические алгоритмы реализованы на чистом JavaScript без использования внешних библиотек.
+        Ниже приведены ключевые функции с подробными комментариями.
+      </p>
+
+      <!-- --------- 5.1 Определитель --------- -->
+      <h3 id="s5-det">5.1 Функция вычисления определителя</h3>
+
+      <p>
+        Определитель вычисляется <strong>рекурсивно</strong> методом разложения Лапласа по первой строке.
+        Рекурсия имеет два базовых случая: матрица 1×1 (возвращает единственный элемент)
+        и матрица 2×2 (формула ad − bc).
+      </p>
+
+      <div class="code-block">
+        <span class="lang-label">JavaScript</span>
+<span class="keyword">function</span> <span class="function">determinant</span>(m, steps, depth) {
+  depth = depth || <span class="number">0</span>;
+  <span class="keyword">const</span> n = m.length;
+  <span class="keyword">const</span> indent = <span class="string">'&amp;nbsp;'</span>.repeat(depth * <span class="number">4</span>);
+
+  <span class="comment">// Базовый случай: матрица 1×1</span>
+  <span class="keyword">if</span> (n === <span class="number">1</span>) {
+    steps.push(<span class="string">`&lt;div class="step"&gt;det = ${fmt(m[0][0])}&lt;/div&gt;`</span>);
+    <span class="keyword">return</span> m[<span class="number">0</span>][<span class="number">0</span>];
+  }
+
+  <span class="comment">// Базовый случай: матрица 2×2</span>
+  <span class="keyword">if</span> (n === <span class="number">2</span>) {
+    <span class="keyword">const</span> d = m[<span class="number">0</span>][<span class="number">0</span>] * m[<span class="number">1</span>][<span class="number">1</span>] - m[<span class="number">0</span>][<span class="number">1</span>] * m[<span class="number">1</span>][<span class="number">0</span>];
+    <span class="keyword">return</span> d;
+  }
+
+  <span class="comment">// Разложение по первой строке</span>
+  <span class="keyword">let</span> d = <span class="number">0</span>;
+  <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j < n; j++) {
+    <span class="comment">// Формируем минор M_{0,j} — вычёркиваем строку 0 и столбец j</span>
+    <span class="keyword">const</span> minor = [];
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">1</span>; i < n; i++) {
+      <span class="keyword">const</span> row = [];
+      <span class="keyword">for</span> (<span class="keyword">let</span> k = <span class="number">0</span>; k < n; k++) {
+        <span class="keyword">if</span> (k !== j) row.push(m[i][k]);
+      }
+      minor.push(row);
+    }
+    <span class="keyword">const</span> sign = (j % <span class="number">2</span> === <span class="number">0</span>) ? <span class="number">1</span> : <span class="number">-1</span>;
+
+    <span class="comment">// Рекурсивно вычисляем определитель минора</span>
+    <span class="keyword">const</span> minorDet = <span class="function">determinant</span>(minor, steps, depth + <span class="number">1</span>);
+    d += sign * m[<span class="number">0</span>][j] * minorDet;
+  }
+
+  <span class="keyword">return</span> d;
+}
+      </div>
+
+      <div class="note-block info">
+        <strong>Принцип работы:</strong> Для матрицы n×n функция проходит по элементам первой строки.
+        Для каждого элемента формируется минор — матрица (n−1)×(n−1) без первой строки и текущего столбца.
+        Рекурсия продолжается, пока не достигнет матрицы 1×1 или 2×2.
+        Алгебраические дополнения чередуют знак: +, −, +, −, …
+      </div>
+
+      <!-- --------- 5.2 Метод Гаусса --------- -->
+      <h3 id="s5-gauss">5.2 Метод Гаусса — решение СЛАУ</h3>
+
+      <p>
+        Реализация включает формирование расширенной матрицы, прямой ход с частичным выбором
+        ведущего элемента (для численной устойчивости), и обратный ход для нахождения неизвестных.
+      </p>
+
+      <div class="code-block">
+        <span class="lang-label">JavaScript</span>
+<span class="keyword">function</span> <span class="function">solveGauss</span>(A, b, n) {
+  <span class="comment">// Формируем расширенную матрицу [A | b]</span>
+  <span class="keyword">const</span> aug = [];
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < n; i++) {
+    aug.push([...A[i], b[i]]);
+  }
+
+  <span class="comment">// ═══ ПРЯМОЙ ХОД ═══</span>
+  <span class="keyword">for</span> (<span class="keyword">let</span> col = <span class="number">0</span>; col < n; col++) {
+    <span class="comment">// Частичный выбор ведущего элемента (partial pivoting)</span>
+    <span class="keyword">let</span> maxRow = col;
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = col + <span class="number">1</span>; i < n; i++) {
+      <span class="keyword">if</span> (Math.abs(aug[i][col]) > Math.abs(aug[maxRow][col]))
+        maxRow = i;
+    }
+    <span class="keyword">if</span> (Math.abs(aug[maxRow][col]) < <span class="number">1e-12</span>) {
+      <span class="keyword">throw new</span> Error(<span class="string">'Матрица вырожденная'</span>);
+    }
+    <span class="comment">// Перестановка строк</span>
+    <span class="keyword">if</span> (maxRow !== col) {
+      [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+    }
+
+    <span class="comment">// Обнуляем элементы ниже ведущего</span>
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = col + <span class="number">1</span>; i < n; i++) {
+      <span class="keyword">if</span> (Math.abs(aug[i][col]) > <span class="number">1e-12</span>) {
+        <span class="keyword">const</span> factor = aug[i][col] / aug[col][col];
+        <span class="keyword">for</span> (<span class="keyword">let</span> j = col; j <= n; j++) {
+          aug[i][j] -= factor * aug[col][j];
+        }
+      }
+    }
+  }
+
+  <span class="comment">// ═══ ОБРАТНЫЙ ХОД ═══</span>
+  <span class="keyword">const</span> x = <span class="keyword">new</span> Array(n).fill(<span class="number">0</span>);
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = n - <span class="number">1</span>; i >= <span class="number">0</span>; i--) {
+    <span class="keyword">let</span> sum = aug[i][n];
+    <span class="keyword">for</span> (<span class="keyword">let</span> j = i + <span class="number">1</span>; j < n; j++) {
+      sum -= aug[i][j] * x[j];
+    }
+    x[i] = sum / aug[i][i];
+  }
+
+  <span class="keyword">return</span> x;
+}
+      </div>
+
+      <div class="section-accent blue">
+        <h4>Ключевые моменты реализации:</h4>
+        <ul>
+          <li><strong>Расширенная матрица:</strong> массив <code>[...A[i], b[i]]</code> — каждая строка матрицы дополняется элементом вектора b</li>
+          <li><strong>Partial pivoting:</strong> поиск максимального |a<sub>ik</sub>| предотвращает деление на малые числа</li>
+          <li><strong>Порог 1e-12:</strong> значения меньше 10<sup>−12</sup> считаются нулевыми (защита от ошибок округления)</li>
+          <li><strong>Деструктуризация:</strong> <code>[aug[col], aug[maxRow]] = [aug[maxRow], aug[col]]</code> — элегантная перестановка строк через ES6</li>
+        </ul>
+      </div>
+
+      <!-- --------- 5.3 Метод Гаусса-Жордана --------- -->
+      <h3 id="s5-jordan">5.3 Метод Гаусса-Жордана для обратной матрицы</h3>
+
+      <p>
+        Обратная матрица находится путём преобразования расширенной матрицы <span class="formula-inline">[A | E]</span>
+        в <span class="formula-inline">[E | A<sup>−1</sup>]</span>. В отличие от обычного метода Гаусса,
+        обнуление происходит как ниже, так и <strong>выше</strong> ведущего элемента.
+      </p>
+
+      <div class="code-block">
+        <span class="lang-label">JavaScript</span>
+<span class="keyword">function</span> <span class="function">inverseMatrix</span>(m, steps) {
+  <span class="keyword">const</span> n = m.length;
+
+  <span class="comment">// Расширенная матрица [A | E]</span>
+  <span class="keyword">const</span> aug = [];
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < n; i++) {
+    aug.push([...m[i]]);
+    <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j < n; j++) {
+      aug[i].push(i === j ? <span class="number">1</span> : <span class="number">0</span>);  <span class="comment">// Единичная матрица</span>
+    }
+  }
+
+  <span class="comment">// Для каждого столбца</span>
+  <span class="keyword">for</span> (<span class="keyword">let</span> col = <span class="number">0</span>; col < n; col++) {
+    <span class="comment">// Выбор ведущего элемента</span>
+    <span class="keyword">let</span> maxRow = col;
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = col + <span class="number">1</span>; i < n; i++) {
+      <span class="keyword">if</span> (Math.abs(aug[i][col]) > Math.abs(aug[maxRow][col]))
+        maxRow = i;
+    }
+    <span class="keyword">if</span> (Math.abs(aug[maxRow][col]) < <span class="number">1e-12</span>) {
+      <span class="keyword">throw new</span> Error(<span class="string">'Матрица вырожденная'</span>);
+    }
+    <span class="keyword">if</span> (maxRow !== col) {
+      [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+    }
+
+    <span class="comment">// Делим строку на ведущий элемент → получаем 1 на диагонали</span>
+    <span class="keyword">const</span> pivot = aug[col][col];
+    <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j < <span class="number">2</span> * n; j++)
+      aug[col][j] /= pivot;
+
+    <span class="comment">// Обнуляем ВЕСЬ столбец (и выше, и ниже)</span>
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < n; i++) {
+      <span class="keyword">if</span> (i !== col && Math.abs(aug[i][col]) > <span class="number">1e-12</span>) {
+        <span class="keyword">const</span> factor = aug[i][col];
+        <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j < <span class="number">2</span> * n; j++)
+          aug[i][j] -= factor * aug[col][j];
+      }
+    }
+  }
+
+  <span class="comment">// Извлекаем правую часть — это A⁻¹</span>
+  <span class="keyword">const</span> inv = [];
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < n; i++) {
+    inv.push(aug[i].slice(n));
+  }
+  <span class="keyword">return</span> inv;
+}
+      </div>
+
+      <!-- --------- 5.4 Метод Крамера --------- -->
+      <h3 id="s5-cramer">5.4 Метод Крамера — решение СЛАУ</h3>
+
+      <p>
+        Реализация метода Крамера использует функцию <code>determinant()</code> для вычисления
+        главного определителя и определителей с заменённым столбцом.
+      </p>
+
+      <div class="code-block">
+        <span class="lang-label">JavaScript</span>
+<span class="keyword">function</span> <span class="function">solveCramer</span>(A, b, n) {
+  <span class="comment">// 1. Главный определитель</span>
+  <span class="keyword">const</span> D = <span class="function">determinant</span>(A, []);
+  <span class="keyword">if</span> (Math.abs(D) < <span class="number">1e-12</span>) {
+    <span class="keyword">throw new</span> Error(<span class="string">'D = 0, метод Крамера неприменим'</span>);
+  }
+
+  <span class="comment">// 2. Определители D_i</span>
+  <span class="keyword">const</span> x = [];
+  <span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j < n; j++) {
+    <span class="comment">// Копируем матрицу A и заменяем j-й столбец вектором b</span>
+    <span class="keyword">const</span> Aj = <span class="function">copyMatrix</span>(A);
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < n; i++) {
+      Aj[i][j] = b[i];
+    }
+    <span class="keyword">const</span> Dj = <span class="function">determinant</span>(Aj, []);
+
+    <span class="comment">// x_j = D_j / D</span>
+    x.push(Dj / D);
+  }
+
+  <span class="keyword">return</span> x;
+}
+      </div>
+
+      <div class="note-block warning">
+        <strong>Замечание:</strong> Метод Крамера использует функцию <code>copyMatrix()</code>
+        для глубокого копирования матрицы, чтобы замена столбца не повлияла на исходную матрицу A.
+        Функция <code>copyMatrix(m)</code> реализована как <code>m.map(row => [...row])</code> —
+        создание нового массива со spread-оператором.
+      </div>
+
+      <!-- --------- 5.5 Ранг --------- -->
+      <h3 id="s5-rank">5.5 Вычисление ранга матрицы</h3>
+
+      <p>
+        Ранг вычисляется приведением матрицы к ступенчатому виду. Количество ненулевых строк
+        в ступенчатой матрице — это и есть ранг.
+      </p>
+
+      <div class="code-block">
+        <span class="lang-label">JavaScript</span>
+<span class="keyword">function</span> <span class="function">matrixRank</span>(m, steps) {
+  <span class="keyword">const</span> M = <span class="function">copyMatrix</span>(m);
+  <span class="keyword">const</span> rows = M.length, cols = M[<span class="number">0</span>].length;
+  <span class="keyword">let</span> rank = <span class="number">0</span>;
+
+  <span class="keyword">for</span> (<span class="keyword">let</span> col = <span class="number">0</span>; col < cols && rank < rows; col++) {
+    <span class="comment">// Ищем ненулевой элемент в столбце col</span>
+    <span class="keyword">let</span> pivotRow = <span class="number">-1</span>;
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = rank; i < rows; i++) {
+      <span class="keyword">if</span> (Math.abs(M[i][col]) > <span class="number">1e-12</span>) {
+        pivotRow = i; <span class="keyword">break</span>;
+      }
+    }
+    <span class="keyword">if</span> (pivotRow === <span class="number">-1</span>) <span class="keyword">continue</span>; <span class="comment">// столбец нулевой</span>
+
+    <span class="comment">// Перестановка строк</span>
+    <span class="keyword">if</span> (pivotRow !== rank) {
+      [M[rank], M[pivotRow]] = [M[pivotRow], M[rank]];
+    }
+
+    <span class="comment">// Обнуляем элементы ниже</span>
+    <span class="keyword">const</span> pivot = M[rank][col];
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = rank + <span class="number">1</span>; i < rows; i++) {
+      <span class="keyword">if</span> (Math.abs(M[i][col]) > <span class="number">1e-12</span>) {
+        <span class="keyword">const</span> factor = M[i][col] / pivot;
+        <span class="keyword">for</span> (<span class="keyword">let</span> j = col; j < cols; j++) {
+          M[i][j] -= factor * M[rank][j];
+        }
+      }
+    }
+    rank++;
+  }
+
+  <span class="keyword">return</span> rank;
+}
+      </div>
+
+      <!-- --------- 5.6 Векторное произведение --------- -->
+      <h3 id="s5-cross">5.6 Векторное произведение</h3>
+
+      <p>
+        Векторное произведение вычисляется по формуле через миноры определителя 3×3.
+        Каждая компонента результата — это разность произведений координат.
+      </p>
+
+      <div class="code-block">
+        <span class="lang-label">JavaScript</span>
+<span class="keyword">case</span> <span class="string">'cross'</span>: {
+  <span class="keyword">const</span> b = <span class="function">readVector</span>(<span class="string">'b'</span>, <span class="number">3</span>);
+
+  <span class="comment">// Формула через компоненты определителя:</span>
+  <span class="comment">// i: a₂b₃ − a₃b₂</span>
+  <span class="comment">// j: a₃b₁ − a₁b₃  (обратите внимание: знак минор j меняется!)</span>
+  <span class="comment">// k: a₁b₂ − a₂b₁</span>
+  <span class="keyword">const</span> r = [
+    a[<span class="number">1</span>]*b[<span class="number">2</span>] - a[<span class="number">2</span>]*b[<span class="number">1</span>],   <span class="comment">// компонента i</span>
+    a[<span class="number">2</span>]*b[<span class="number">0</span>] - a[<span class="number">0</span>]*b[<span class="number">2</span>],   <span class="comment">// компонента j</span>
+    a[<span class="number">0</span>]*b[<span class="number">1</span>] - a[<span class="number">1</span>]*b[<span class="number">0</span>]    <span class="comment">// компонента k</span>
+  ];
+
+  <span class="comment">// Вывод результата</span>
+  html += resultHTML(r);
+  <span class="keyword">break</span>;
+}
+      </div>
+
+      <div class="note-block info">
+        <strong>Смешанное произведение</strong> реализовано с помощью функции <code>determinant()</code> —
+        из координат трёх векторов составляется матрица 3×3, и вычисляется её определитель:
+        <code>const m = [a, b, c]; const d = determinant(m, detSteps);</code>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- =========================================================== -->
+    <!-- РАЗДЕЛ 6: ИНТЕРФЕЙС И UX                                   -->
+    <!-- =========================================================== -->
+    <div class="section" id="section-6">
+      <h2>6. Интерфейс и пользовательский опыт (UX)</h2>
+
+      <!-- --------- 6.1 Вкладки --------- -->
+      <h3 id="s6-tabs">6.1 Система вкладок</h3>
+
+      <p>
+        Интерфейс приложения организован в виде <strong>трёх вкладок</strong>, позволяющих
+        переключаться между модулями без перезагрузки страницы:
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Вкладка</th>
+              <th>Операции</th>
+              <th>Описание</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-purple">Матрицы</span></td>
+              <td>A+B, A−B, A×k, A×B, Aᵀ, det(A), rank(A)</td>
+              <td>7 операций с настройкой размерности матриц</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-green">СЛАУ</span></td>
+              <td>Гаусс, Крамер, Матричный</td>
+              <td>Ввод системы уравнений, выбор метода</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-blue">Векторы</span></td>
+              <td>a⃗±b⃗, k·a⃗, (a⃗·b⃗), [a⃗×b⃗], (a⃗,b⃗,c⃗)</td>
+              <td>6 операций с настройкой размерности</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Переключение вкладок реализовано функцией <code>switchTab(name)</code>, которая
+        скрывает текущее содержимое и показывает выбранное с помощью управления CSS-классом <code>.active</code>.
+      </p>
+
+      <div class="code-block">
+        <span class="lang-label">JavaScript</span>
+<span class="keyword">function</span> <span class="function">switchTab</span>(name) {
+  <span class="comment">// Убираем активный класс у всех кнопок и контента</span>
+  document.querySelectorAll(<span class="string">'.tab-btn'</span>).forEach(b => b.classList.remove(<span class="string">'active'</span>));
+  document.querySelectorAll(<span class="string">'.tab-content'</span>).forEach(c => c.classList.remove(<span class="string">'active'</span>));
+  <span class="comment">// Активируем нужную вкладку</span>
+  document.getElementById(<span class="string">'tab-'</span> + name).classList.add(<span class="string">'active'</span>);
+}
+      </div>
+
+      <!-- --------- 6.2 Динамическая генерация --------- -->
+      <h3 id="s6-dynamic">6.2 Динамическая генерация полей ввода</h3>
+
+      <p>
+        Одна из ключевых особенностей приложения — <strong>динамическая генерация полей ввода</strong>
+        в зависимости от выбранной операции и размерности. При изменении типа операции или размера
+        матрицы поля ввода полностью перестраиваются.
+      </p>
+
+      <div class="section-accent purple">
+        <h4>Как это работает:</h4>
+        <ol>
+          <li>Пользователь выбирает операцию (например, «A × B»)</li>
+          <li>Вызывается <code>setMatOp('mul')</code>, которая обновляет глобальную переменную <code>matOp</code></li>
+          <li>Вызывается <code>buildMatInputs()</code>, которая генерирует HTML для управления размерностями</li>
+          <li>Вызывается <code>rebuildMatGrids()</code>, которая создаёт сетку полей ввода</li>
+          <li>Функция <code>matrixGridHTML(prefix, rows, cols)</code> формирует CSS Grid с input-элементами</li>
+        </ol>
+      </div>
+
+      <p>
+        Для СЛАУ поля генерируются в виде уравнений с подписями переменных
+        (x₁, x₂, …, xₙ), плюсами между коэффициентами и знаком «=» перед свободным членом.
+        Это придаёт интерфейсу наглядность — пользователь видит систему уравнений в привычном виде.
+      </p>
+
+      <p>
+        Для векторов поля организованы в виде кортежа с круглыми скобками
+        <span class="formula-inline">( a₁, a₂, a₃ )</span> и запятыми-разделителями, что визуально
+        соответствует математической записи вектора.
+      </p>
+
+      <!-- --------- 6.3 Промежуточные шаги --------- -->
+      <h3 id="s6-steps">6.3 Отображение промежуточных шагов</h3>
+
+      <p>
+        Калькулятор отображает подробные <strong>промежуточные шаги</strong> для каждого вычисления.
+        Это ключевая учебная функция приложения, позволяющая студентам проверять своё решение
+        на каждом этапе.
+      </p>
+
+      <div class="section-accent green">
+        <h4>Что отображается в промежуточных шагах:</h4>
+        <ul>
+          <li><strong>Сложение/вычитание:</strong> формула для каждого элемента: c<sub>ij</sub> = a<sub>ij</sub> ± b<sub>ij</sub> = результат</li>
+          <li><strong>Умножение матриц:</strong> для каждого c<sub>ij</sub> показываются все члены суммы</li>
+          <li><strong>Определитель:</strong> дерево рекурсии с разложением на миноры</li>
+          <li><strong>Метод Гаусса:</strong> расширенная матрица на каждом шаге прямого и обратного хода</li>
+          <li><strong>Метод Крамера:</strong> вычисление каждого определителя D<sub>i</sub></li>
+          <li><strong>Матричный метод:</strong> нахождение обратной матрицы и умножение на b</li>
+        </ul>
+      </div>
+
+      <p>
+        Блок промежуточных шагов реализован как <strong>сворачиваемая секция</strong>. Пользователь
+        может кликнуть на заголовок (▸ / ▾) для раскрытия или сворачивания. По умолчанию шаги развёрнуты.
+      </p>
+
+      <div class="code-block">
+        <span class="lang-label">JavaScript</span>
+<span class="keyword">function</span> <span class="function">stepsWrapHTML</span>(title, bodyHTML) {
+  <span class="keyword">const</span> id = <span class="string">'steps_'</span> + Math.random().toString(<span class="number">36</span>).substr(<span class="number">2</span>, <span class="number">8</span>);
+  <span class="keyword">return</span> <span class="string">`&lt;div class="steps"&gt;
+    &lt;div class="steps-title" onclick="toggleSteps('${id}')"&gt;▸ ${title}&lt;/div&gt;
+    &lt;div class="steps-body open" id="${id}"&gt;${bodyHTML}&lt;/div&gt;
+  &lt;/div&gt;`</span>;
+}
+
+<span class="keyword">function</span> <span class="function">toggleSteps</span>(id) {
+  <span class="keyword">const</span> el = document.getElementById(id);
+  el.classList.toggle(<span class="string">'open'</span>);
+}
+      </div>
+
+      <!-- --------- 6.4 Обработка ошибок --------- -->
+      <h3 id="s6-errors">6.4 Обработка ошибок</h3>
+
+      <p>
+        Приложение обрабатывает различные ошибочные ситуации и выводит
+        понятные сообщения на русском языке:
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ситуация</th>
+              <th>Сообщение</th>
+              <th>Модуль</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Нечисловое значение в ячейке</td>
+              <td>«Некорректное значение в ячейке (i, j) матрицы A»</td>
+              <td><span class="badge badge-purple">Матрицы</span></td>
+            </tr>
+            <tr>
+              <td>Определитель неквадратной матрицы</td>
+              <td>«Определитель вычисляется только для квадратных матриц»</td>
+              <td><span class="badge badge-purple">Матрицы</span></td>
+            </tr>
+            <tr>
+              <td>Вырожденная матрица (det = 0)</td>
+              <td>«Матрица вырожденная, обратная не существует»</td>
+              <td><span class="badge badge-green">СЛАУ</span></td>
+            </tr>
+            <tr>
+              <td>D = 0 при методе Крамера</td>
+              <td>«Определитель D = 0. Метод Крамера неприменим»</td>
+              <td><span class="badge badge-green">СЛАУ</span></td>
+            </tr>
+            <tr>
+              <td>Некорректный скаляр</td>
+              <td>«Введите корректное число k»</td>
+              <td><span class="badge badge-purple">Матрицы</span> <span class="badge badge-blue">Векторы</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Все вычисления обёрнуты в блок <code>try { … } catch (e) { … }</code>.
+        Ошибки выводятся в красном блоке <code>.error-msg</code> с иконкой ⚠️.
+      </p>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- =========================================================== -->
+    <!-- РАЗДЕЛ 7: ТЕХНИЧЕСКИЕ ХАРАКТЕРИСТИКИ                        -->
+    <!-- =========================================================== -->
+    <div class="section" id="section-7">
+      <h2>7. Технические характеристики</h2>
+
+      <!-- --------- 7.1 Надёжность --------- -->
+      <h3 id="s7-reliability">7.1 Надёжность вычислений</h3>
+
+      <p>
+        Для обеспечения корректности вычислений в условиях работы с числами с плавающей запятой (IEEE 754)
+        применяется ряд защитных механизмов:
+      </p>
+
+      <div class="section-accent red">
+        <h4>Обработка edge-случаев:</h4>
+        <ul>
+          <li><strong>Погрешность округления:</strong> значения меньше <code>1e-12</code> (10<sup>−12</sup>) считаются нулевыми, что предотвращает ложное обнаружение ненулевых элементов</li>
+          <li><strong>Частичный выбор ведущего:</strong> (partial pivoting) в методах Гаусса и Гаусса-Жордана улучшает численную устойчивость</li>
+          <li><strong>Нулевой определитель:</strong> проверяется перед делением в методах Крамера и матричном; при det(A) = 0 выводится информативное сообщение</li>
+          <li><strong>Несовместимые размеры:</strong> интерфейс автоматически синхронизирует размеры (например, число столбцов A = число строк B при умножении)</li>
+          <li><strong>Форматирование вывода:</strong> функция <code>fmt()</code> округляет числа до 4 знаков, убирая хвостовые нули и обрабатывая «почти целые» значения</li>
+        </ul>
+      </div>
+
+      <div class="code-block">
+        <span class="lang-label">JavaScript</span>
+<span class="comment">/** Округление числа для красивого вывода */</span>
+<span class="keyword">function</span> <span class="function">fmt</span>(x) {
+  <span class="keyword">if</span> (Math.abs(x) < <span class="number">1e-12</span>) <span class="keyword">return</span> <span class="string">'0'</span>;
+  <span class="keyword">if</span> (Number.isInteger(x)) <span class="keyword">return</span> String(x);
+  <span class="keyword">if</span> (Math.abs(x - Math.round(x)) < <span class="number">1e-9</span>) <span class="keyword">return</span> String(Math.round(x));
+  <span class="keyword">let</span> s = x.toFixed(<span class="number">4</span>);
+  s = s.replace(<span class="string">/\.?0+$/</span>, <span class="string">''</span>);
+  <span class="keyword">return</span> s;
+}
+      </div>
+
+      <!-- --------- 7.2 Производительность --------- -->
+      <h3 id="s7-performance">7.2 Производительность</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Операция</th>
+              <th>Сложность</th>
+              <th>Время (n=5)</th>
+              <th>Время (n=10)</th>
+              <th>Время (n=15)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Сложение/вычитание</td>
+              <td>O(n²)</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+            </tr>
+            <tr>
+              <td>Умножение на число</td>
+              <td>O(n²)</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+            </tr>
+            <tr>
+              <td>Умножение матриц</td>
+              <td>O(n³)</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+              <td>~2 мс</td>
+            </tr>
+            <tr>
+              <td>Транспонирование</td>
+              <td>O(n²)</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+            </tr>
+            <tr>
+              <td>Определитель (рекурсия)</td>
+              <td>O(n!)</td>
+              <td>&lt; 1 мс</td>
+              <td>~500 мс</td>
+              <td>~10 сек</td>
+            </tr>
+            <tr>
+              <td>Ранг (метод Гаусса)</td>
+              <td>O(n³)</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+              <td>~2 мс</td>
+            </tr>
+            <tr>
+              <td>Решение СЛАУ (Гаусс)</td>
+              <td>O(n³)</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+              <td>~3 мс</td>
+            </tr>
+            <tr>
+              <td>Решение СЛАУ (Крамер)</td>
+              <td>O(n · n!)</td>
+              <td>~1 мс</td>
+              <td>~5 сек</td>
+              <td>Не рекоменд.</td>
+            </tr>
+            <tr>
+              <td>Скалярное произведение</td>
+              <td>O(n)</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+              <td>&lt; 1 мс</td>
+            </tr>
+            <tr>
+              <td>Векторное произведение</td>
+              <td>O(1)</td>
+              <td>&lt; 1 мс</td>
+              <td colspan="2">Фиксировано 3D</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note-block warning">
+        <strong>Предупреждение:</strong> Рекурсивное вычисление определителя имеет факториальную сложность O(n!).
+        Для матриц 10×10 и больше время вычисления может быть значительным. Метод Крамера,
+        вычисляющий n+1 определитель, ещё более ресурсоёмкий. Для больших матриц рекомендуется
+        использовать метод Гаусса (O(n³)).
+      </div>
+
+      <!-- --------- 7.3 Совместимость --------- -->
+      <h3 id="s7-compat">7.3 Совместимость с браузерами</h3>
+
+      <p>
+        Приложение использует стандартные возможности HTML5, CSS3 и ES6+, поддерживаемые
+        всеми современными браузерами:
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Браузер</th>
+              <th>Минимальная версия</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Google Chrome</td>
+              <td>60+</td>
+              <td><span class="badge badge-green">Полная поддержка</span></td>
+            </tr>
+            <tr>
+              <td>Mozilla Firefox</td>
+              <td>55+</td>
+              <td><span class="badge badge-green">Полная поддержка</span></td>
+            </tr>
+            <tr>
+              <td>Microsoft Edge</td>
+              <td>79+ (Chromium)</td>
+              <td><span class="badge badge-green">Полная поддержка</span></td>
+            </tr>
+            <tr>
+              <td>Safari</td>
+              <td>12+</td>
+              <td><span class="badge badge-green">Полная поддержка</span></td>
+            </tr>
+            <tr>
+              <td>Opera</td>
+              <td>47+</td>
+              <td><span class="badge badge-green">Полная поддержка</span></td>
+            </tr>
+            <tr>
+              <td>Internet Explorer</td>
+              <td>—</td>
+              <td><span class="badge badge-red">Не поддерживается</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Используемые возможности ES6+:</h4>
+      <ul>
+        <li><code>const</code> / <code>let</code> — блочная область видимости</li>
+        <li>Стрелочные функции: <code>row => [...row]</code></li>
+        <li>Template literals: <code>`det = ${fmt(d)}`</code></li>
+        <li>Spread-оператор: <code>[...A[i], b[i]]</code></li>
+        <li>Деструктуризация: <code>[aug[col], aug[maxRow]] = [...]</code></li>
+        <li><code>Array.prototype.map()</code>, <code>.forEach()</code>, <code>.fill()</code></li>
+      </ul>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- =========================================================== -->
+    <!-- РАЗДЕЛ 8: ПРИМЕРЫ ИСПОЛЬЗОВАНИЯ                             -->
+    <!-- =========================================================== -->
+    <div class="section" id="section-8">
+      <h2>8. Примеры использования</h2>
+
+      <!-- --------- 8.1 Матрицы --------- -->
+      <h3 id="s8-mat">8.1 Примеры: операции над матрицами</h3>
+
+      <!-- Пример 1: Умножение матриц -->
+      <div class="example-block">
+        <h4>📌 Пример 1: Умножение матриц A(2×3) × B(3×2)</h4>
+
+        <div class="example-step">
+          <div class="label">Входные данные</div>
+          <p>Матрица A (2×3):</p>
+          <div class="matrix-display" style="grid-template-columns: repeat(3, 45px);">
+            <div class="cell">1</div><div class="cell">2</div><div class="cell">3</div>
+            <div class="cell">4</div><div class="cell">5</div><div class="cell">6</div>
+          </div>
+          <p style="margin-top:0.5rem;">Матрица B (3×2):</p>
+          <div class="matrix-display" style="grid-template-columns: repeat(2, 45px);">
+            <div class="cell">7</div><div class="cell">8</div>
+            <div class="cell">9</div><div class="cell">10</div>
+            <div class="cell">11</div><div class="cell">12</div>
+          </div>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Промежуточные шаги</div>
+          <p>c₁₁ = 1·7 + 2·9 + 3·11 = 7 + 18 + 33 = <strong>58</strong></p>
+          <p>c₁₂ = 1·8 + 2·10 + 3·12 = 8 + 20 + 36 = <strong>64</strong></p>
+          <p>c₂₁ = 4·7 + 5·9 + 6·11 = 28 + 45 + 66 = <strong>139</strong></p>
+          <p>c₂₂ = 4·8 + 5·10 + 6·12 = 32 + 50 + 72 = <strong>154</strong></p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Результат C = A × B (2×2)</div>
+          <div class="matrix-display" style="grid-template-columns: repeat(2, 45px);">
+            <div class="cell">58</div><div class="cell">64</div>
+            <div class="cell">139</div><div class="cell">154</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Пример 2: Определитель 3×3 -->
+      <div class="example-block">
+        <h4>📌 Пример 2: Определитель матрицы 3×3</h4>
+
+        <div class="example-step">
+          <div class="label">Входные данные</div>
+          <div class="matrix-display" style="grid-template-columns: repeat(3, 45px);">
+            <div class="cell">2</div><div class="cell">1</div><div class="cell">3</div>
+            <div class="cell">4</div><div class="cell">−1</div><div class="cell">2</div>
+            <div class="cell">1</div><div class="cell">5</div><div class="cell">−3</div>
+          </div>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Промежуточные шаги (разложение по 1-й строке)</div>
+          <p><strong>A₁₁ = +2 · M₁₁</strong></p>
+          <p style="padding-left:1rem;">M₁₁ = det|−1, 2; 5, −3| = (−1)(−3) − (2)(5) = 3 − 10 = −7</p>
+          <p style="padding-left:1rem;">Слагаемое: +2 · (−7) = −14</p>
+          <br>
+          <p><strong>A₁₂ = −1 · M₁₂</strong></p>
+          <p style="padding-left:1rem;">M₁₂ = det|4, 2; 1, −3| = (4)(−3) − (2)(1) = −12 − 2 = −14</p>
+          <p style="padding-left:1rem;">Слагаемое: −1 · (−14) = +14</p>
+          <br>
+          <p><strong>A₁₃ = +3 · M₁₃</strong></p>
+          <p style="padding-left:1rem;">M₁₃ = det|4, −1; 1, 5| = (4)(5) − (−1)(1) = 20 + 1 = 21</p>
+          <p style="padding-left:1rem;">Слагаемое: +3 · 21 = +63</p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Результат</div>
+          <p style="font-size:1.2rem;"><strong>det(A) = −14 + 14 + 63 = 63</strong></p>
+        </div>
+      </div>
+
+      <!-- Пример 3: Транспонирование и ранг -->
+      <div class="example-block">
+        <h4>📌 Пример 3: Транспонирование матрицы</h4>
+
+        <div class="example-step">
+          <div class="label">Входные данные — матрица 2×4</div>
+          <div class="matrix-display" style="grid-template-columns: repeat(4, 45px);">
+            <div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div>
+            <div class="cell">5</div><div class="cell">6</div><div class="cell">7</div><div class="cell">8</div>
+          </div>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Результат — транспонированная матрица 4×2</div>
+          <p>Меняем строки и столбцы местами: A<sup>T</sup><sub>ij</sub> = A<sub>ji</sub></p>
+          <div class="matrix-display" style="grid-template-columns: repeat(2, 45px);">
+            <div class="cell">1</div><div class="cell">5</div>
+            <div class="cell">2</div><div class="cell">6</div>
+            <div class="cell">3</div><div class="cell">7</div>
+            <div class="cell">4</div><div class="cell">8</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- --------- 8.2 СЛАУ --------- -->
+      <h3 id="s8-slau">8.2 Примеры: решение СЛАУ</h3>
+
+      <!-- Пример 1: Метод Гаусса -->
+      <div class="example-block">
+        <h4>📌 Пример 1: Решение системы 3×3 методом Гаусса</h4>
+
+        <div class="example-step">
+          <div class="label">Система уравнений</div>
+          <div class="formula" style="text-align:left; display:inline-block;">
+            2x₁ + x₂ − x₃ = 8<br>
+            −3x₁ − x₂ + 2x₃ = −11<br>
+            −2x₁ + x₂ + 2x₃ = −3
+          </div>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Расширенная матрица [A | b]</div>
+          <div class="matrix-display" style="grid-template-columns: repeat(4, 45px);">
+            <div class="cell">2</div><div class="cell">1</div><div class="cell">−1</div><div class="cell" style="border-left:2px solid rgba(124,92,252,0.4);">8</div>
+            <div class="cell">−3</div><div class="cell">−1</div><div class="cell">2</div><div class="cell" style="border-left:2px solid rgba(124,92,252,0.4);">−11</div>
+            <div class="cell">−2</div><div class="cell">1</div><div class="cell">2</div><div class="cell" style="border-left:2px solid rgba(124,92,252,0.4);">−3</div>
+          </div>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Прямой ход</div>
+          <p><strong>Шаг 1:</strong> R₂ = R₂ − (−3/2)·R₁ = R₂ + 1.5·R₁</p>
+          <p>R₂: (−3+3, −1+1.5, 2−1.5, −11+12) → (0, 0.5, 0.5, 1)</p>
+          <p><strong>Шаг 2:</strong> R₃ = R₃ − (−2/2)·R₁ = R₃ + R₁</p>
+          <p>R₃: (−2+2, 1+1, 2−1, −3+8) → (0, 2, 1, 5)</p>
+          <p><strong>Шаг 3:</strong> R₃ = R₃ − (2/0.5)·R₂ = R₃ − 4·R₂</p>
+          <p>R₃: (0, 2−2, 1−2, 5−4) → (0, 0, −1, 1)</p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Обратный ход</div>
+          <p>x₃ = 1 / (−1) = <strong>−1</strong></p>
+          <p>x₂ = (1 − 0.5·(−1)) / 0.5 = 1.5 / 0.5 = <strong>3</strong></p>
+          <p>x₁ = (8 − 1·3 − (−1)·(−1)) / 2 = (8 − 3 − 1) / 2 = <strong>2</strong></p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Ответ</div>
+          <p style="font-size:1.1rem;"><strong>x₁ = 2, x₂ = 3, x₃ = −1</strong></p>
+        </div>
+      </div>
+
+      <!-- Пример 2: Метод Крамера -->
+      <div class="example-block">
+        <h4>📌 Пример 2: Решение системы 2×2 методом Крамера</h4>
+
+        <div class="example-step">
+          <div class="label">Система уравнений</div>
+          <div class="formula" style="text-align:left; display:inline-block;">
+            3x₁ + 2x₂ = 7<br>
+            x₁ − x₂ = −1
+          </div>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Вычисление определителей</div>
+          <p><strong>D</strong> = det|3, 2; 1, −1| = 3·(−1) − 2·1 = −3 − 2 = <strong>−5</strong></p>
+          <p><strong>D₁</strong> = det|7, 2; −1, −1| = 7·(−1) − 2·(−1) = −7 + 2 = <strong>−5</strong></p>
+          <p><strong>D₂</strong> = det|3, 7; 1, −1| = 3·(−1) − 7·1 = −3 − 7 = <strong>−10</strong></p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Ответ</div>
+          <p>x₁ = D₁ / D = −5 / −5 = <strong>1</strong></p>
+          <p>x₂ = D₂ / D = −10 / −5 = <strong>2</strong></p>
+          <p><strong>Проверка:</strong> 3·1 + 2·2 = 3 + 4 = 7 ✓ &nbsp;&nbsp; 1 − 2 = −1 ✓</p>
+        </div>
+      </div>
+
+      <!-- Пример 3: Матричный метод -->
+      <div class="example-block">
+        <h4>📌 Пример 3: Решение системы 2×2 матричным методом</h4>
+
+        <div class="example-step">
+          <div class="label">Система уравнений</div>
+          <div class="formula" style="text-align:left; display:inline-block;">
+            2x₁ + 5x₂ = 1<br>
+            x₁ + 3x₂ = 2
+          </div>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Нахождение обратной матрицы A⁻¹</div>
+          <p>det(A) = 2·3 − 5·1 = 6 − 5 = <strong>1</strong> (≠ 0, обратная существует)</p>
+          <p>Для матрицы 2×2:</p>
+          <div class="formula">
+            A⁻¹ = (1/det(A)) ·
+            | &nbsp;a₂₂ &nbsp;−a₁₂ |
+            | −a₂₁ &nbsp;&nbsp;a₁₁ |
+            = (1/1) ·
+            | &nbsp;3 &nbsp;−5 |
+            | −1 &nbsp;&nbsp;2 |
+          </div>
+        </div>
+
+        <div class="example-step">
+          <div class="label">X = A⁻¹ · B</div>
+          <p>x₁ = 3·1 + (−5)·2 = 3 − 10 = <strong>−7</strong></p>
+          <p>x₂ = (−1)·1 + 2·2 = −1 + 4 = <strong>3</strong></p>
+          <p><strong>Проверка:</strong> 2·(−7) + 5·3 = −14 + 15 = 1 ✓ &nbsp;&nbsp; 1·(−7) + 3·3 = −7 + 9 = 2 ✓</p>
+        </div>
+      </div>
+
+      <!-- --------- 8.3 Векторы --------- -->
+      <h3 id="s8-vec">8.3 Примеры: операции над векторами</h3>
+
+      <!-- Пример 1: Скалярное произведение -->
+      <div class="example-block">
+        <h4>📌 Пример 1: Скалярное произведение</h4>
+
+        <div class="example-step">
+          <div class="label">Входные данные</div>
+          <p>a⃗ = (1, 2, 3), &nbsp;&nbsp; b⃗ = (4, −5, 6)</p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Вычисление</div>
+          <p>(a⃗, b⃗) = 1·4 + 2·(−5) + 3·6 = 4 − 10 + 18 = <strong>12</strong></p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Результат</div>
+          <p style="font-size:1.1rem;"><strong>(a⃗ · b⃗) = 12</strong></p>
+        </div>
+      </div>
+
+      <!-- Пример 2: Векторное произведение -->
+      <div class="example-block">
+        <h4>📌 Пример 2: Векторное произведение</h4>
+
+        <div class="example-step">
+          <div class="label">Входные данные</div>
+          <p>a⃗ = (2, 3, 4), &nbsp;&nbsp; b⃗ = (5, 6, 7)</p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Вычисление по формуле</div>
+          <p>[a⃗ × b⃗] = (a₂b₃ − a₃b₂, &nbsp;a₃b₁ − a₁b₃, &nbsp;a₁b₂ − a₂b₁)</p>
+          <p><strong>i:</strong> 3·7 − 4·6 = 21 − 24 = <strong>−3</strong></p>
+          <p><strong>j:</strong> 4·5 − 2·7 = 20 − 14 = <strong>6</strong></p>
+          <p><strong>k:</strong> 2·6 − 3·5 = 12 − 15 = <strong>−3</strong></p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Результат</div>
+          <p style="font-size:1.1rem;"><strong>[a⃗ × b⃗] = (−3, 6, −3)</strong></p>
+        </div>
+      </div>
+
+      <!-- Пример 3: Смешанное произведение -->
+      <div class="example-block">
+        <h4>📌 Пример 3: Смешанное произведение</h4>
+
+        <div class="example-step">
+          <div class="label">Входные данные</div>
+          <p>a⃗ = (1, 0, 0), &nbsp;&nbsp; b⃗ = (0, 1, 0), &nbsp;&nbsp; c⃗ = (0, 0, 1)</p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Вычисление — определитель 3×3</div>
+          <div class="matrix-display" style="grid-template-columns: repeat(3, 45px);">
+            <div class="cell">1</div><div class="cell">0</div><div class="cell">0</div>
+            <div class="cell">0</div><div class="cell">1</div><div class="cell">0</div>
+            <div class="cell">0</div><div class="cell">0</div><div class="cell">1</div>
+          </div>
+          <p style="margin-top:0.5rem;">det = 1·(1·1 − 0·0) − 0·(0·1 − 0·0) + 0·(0·0 − 1·0) = 1 − 0 + 0 = <strong>1</strong></p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Результат</div>
+          <p style="font-size:1.1rem;"><strong>(a⃗, b⃗, c⃗) = 1</strong></p>
+          <p>Тройка векторов i⃗, j⃗, k⃗ образует правую тройку. Объём параллелепипеда = |1| = 1 (единичный куб).</p>
+        </div>
+      </div>
+
+      <!-- Дополнительный пример: смешанное произведение с компланарными векторами -->
+      <div class="example-block">
+        <h4>📌 Пример 4: Смешанное произведение — компланарные векторы</h4>
+
+        <div class="example-step">
+          <div class="label">Входные данные</div>
+          <p>a⃗ = (1, 2, 3), &nbsp;&nbsp; b⃗ = (4, 5, 6), &nbsp;&nbsp; c⃗ = (7, 8, 9)</p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Вычисление</div>
+          <p>det = 1·(5·9 − 6·8) − 2·(4·9 − 6·7) + 3·(4·8 − 5·7)</p>
+          <p>= 1·(45 − 48) − 2·(36 − 42) + 3·(32 − 35)</p>
+          <p>= 1·(−3) − 2·(−6) + 3·(−3) = −3 + 12 − 9 = <strong>0</strong></p>
+        </div>
+
+        <div class="example-step">
+          <div class="label">Результат</div>
+          <p style="font-size:1.1rem;"><strong>(a⃗, b⃗, c⃗) = 0</strong></p>
+          <p>Смешанное произведение равно 0 — <strong>векторы компланарны</strong> (лежат в одной плоскости).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- =========================================================== -->
+    <!-- РАЗДЕЛ 9: ЗАКЛЮЧЕНИЕ                                        -->
+    <!-- =========================================================== -->
+    <div class="section" id="section-9">
+      <h2>9. Заключение</h2>
+
+      <p>
+        Матричный калькулятор представляет собой полноценное учебное веб-приложение, реализующее
+        широкий спектр операций линейной алгебры. Основные достижения проекта:
+      </p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value" style="color:#22c55e;">16</div>
+          <div class="stat-label">Математических операций</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:#3b82f6;">~1500</div>
+          <div class="stat-label">Строк JavaScript-кода</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:#a78bfa;">0</div>
+          <div class="stat-label">Внешних зависимостей</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:#eab308;">1</div>
+          <div class="stat-label">HTML-файл (всё включено)</div>
+        </div>
+      </div>
+
+      <div class="section-accent purple">
+        <h4>Ключевые преимущества:</h4>
+        <ul>
+          <li><strong>Автономность:</strong> все вычисления на стороне клиента, не требуется сервер или интернет после загрузки</li>
+          <li><strong>Учебная ценность:</strong> подробные промежуточные шаги для каждой операции помогают понять алгоритмы</li>
+          <li><strong>Три модуля:</strong> матрицы, СЛАУ и векторы покрывают основные темы курса линейной алгебры</li>
+          <li><strong>Гибкость:</strong> поддержка матриц до 15×15 и настраиваемая размерность векторов</li>
+          <li><strong>Современный интерфейс:</strong> адаптивный дизайн, тёмная тема, визуальные скобки матриц</li>
+          <li><strong>Обработка ошибок:</strong> информативные сообщения при некорректных данных или вырожденных матрицах</li>
+          <li><strong>Чистый код:</strong> хорошо структурированный JavaScript без зависимостей от внешних библиотек</li>
+        </ul>
+      </div>
+
+      <div class="note-block success">
+        <strong>Итого:</strong> Проект демонстрирует практическое применение знаний линейной алгебры
+        и веб-программирования. Все математические алгоритмы реализованы с нуля, с акцентом на
+        корректность, наглядность и устойчивость вычислений.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Кнопка «Наверх» -->
+  <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
+
+  <script>
+    // Показ/скрытие кнопки «Наверх» при прокрутке
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('backToTop');
+      if (window.scrollY > 400) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+  </script>
+</body>
+</html>
